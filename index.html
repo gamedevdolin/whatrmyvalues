@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>What R My Values? - A Values Discovery Tool</title>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+      <style>
+                :root {
+                              --sunset-orange: #E07A5F;
+                              --sunset-gold: #F2CC8F;
+                              --sunset-coral: #F4A261;
+                              --deep-brown: #3D2C29;
+                              --cream: #FAF8F5;
+                              --ocean-blue: #5B8A8A;
+                              --muted-sage: #81B29A;
+                              --light-gray: #E8E4E0;
+                }
+
+                * {
+                              margin: 0;
+                              padding: 0;
+                              box-sizing: border-box;
+                }
+
+                body {
+                              font-family: 'DM Sans', sans-serif;
+                              background: var(--cream);
+                              color: var(--deep-brown);
+                              min-height: 100vh;
+                              line-height: 1.6;
+                }
+
+                .container {
+                              max-width: 900px;
+                              margin: 0 auto;
+                              padding: 2rem 1.5rem;
+                }
+
+                /* Header */
+                header {
+                              text-align: center;
+                              margin-bottom: 2rem;
+                }
+
+                h1 {
+                              font-family: 'Fraunces', serif;
+                              font-size: clamp(2rem, 5vw, 2.75rem);
+                              color: var(--deep-brown);
+                              margin-bottom: 0.5rem;
+                }
+
+                .tagline {
+                              color: var(--ocean-blue);
+                              font-size: 1.1rem;
+                              margin-bottom: 1.5rem;
+                }
+
+                /* Progress indicator */
+                .progress-bar {
+                              display: flex;
+                              justify-content: center;
+                              gap: 0.5rem;
+                              margin-bottom: 2rem;
+                }
+
+                .progress-step {
+                              display: flex;
+                              align-items: center;
+                              gap: 0.5rem;
+                              font-size: 0.85rem;
+                              color: var(--deep-brown);
+                              opacity: 0.4;
+                              transition: opacity 0.3s ease;
+                }
+
+                .progress-step.active {
+                              opacity: 1;
+                }
+
+                .progress-step.completed {
+                              opacity: 0.7;
+                }
+
+                .step-number {
+                              width: 28px;
+                              height: 28px;
+                              border-radius: 50%;
+                              background: var(--light-gray);
+                              display: flex;
+                              align-items: center;
+                              justify-content: center;
+                              font-weight: 600;
+                              font-size: 0.8rem;
+                              transition: all 0.3s ease;
+                }
+
+                .progress-step.active .step-number {
+                              background: var(--sunset-orange);
+                              color: white;
+                }
+
+                .progress-step.completed .step-number {
+                              background: var(--muted-sage);
+                              color: white;
+                }
+
+                .step-connector {
+                              width: 30px;
+                              height: 2px;
+                              background: var(--light-gray);
+                }
+
+                /* Screens */
+                .screen {
+                              display: none;
+                              animation: fadeIn 0.4s ease;
+                }
+
+                .screen.active {
+                              display: block;
+                }
+
+                @keyframes fadeIn {
+                              from { opacity: 0; transform: translateY(10px); }
+                              to { opacity: 1; transform: translateY(0); }
+                }
+
+                /* Intro screen */
+                .intro-content {
+                              text-align: center;
+                              max-width: 600px;
+                              margin: 0 auto;
+                }
+
+                .intro-content p {
+                              margin-bottom: 1.25rem;
+                              font-size: 1.05rem;
+                }
+
+                .intro-content blockquote {
+                              background: white;
+                              border-left: 4px solid var(--sunset-orange);
+                              padding: 1.25rem 1.5rem;
+                              margin: 1.5rem 0;
+                              font-style: italic;
+                              text-align: left;
+                              border-radius: 0 8px 8px 0;
+                }
+
+                /* Values grid */
+                .values-instruction {
+                              text-align: center;
+                              margin-bottom: 1.5rem;
+                }
+
+                .values-instruction h2 {
+                              font-family: 'Fraunces', serif;
+                              font-size: 1.5rem;
+                              margin-bottom: 0.5rem;
+                }
+
+                .values-instruction p {
+                              color: #666;
+                }
+
+                .selection-count {
+                              text-align: center;
+                              margin-bottom: 1rem;
+                              font-size: 0.95rem;
+                              color: var(--ocean-blue);
+                              font-weight: 500;
+                }
+
+                .values-grid {
+                              display: grid;
+                              grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                              gap: 0.75rem;
+                              margin-bottom: 2rem;
+                }
+
+                .value-card {
+                              background: white;
+                              border: 2px solid var(--light-gray);
+                              border-radius: 8px;
+                              padding: 1rem 1.25rem;
+                              cursor: pointer;
+                              transition: all 0.2s ease;
+                }
+
+                .value-card:hover {
+                              border-color: var(--sunset-coral);
+                              transform: translateY(-2px);
+                              box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+                }
+
+                .value-card.selected {
+                              border-color: var(--sunset-orange);
+                              background: linear-gradient(135deg, #FFF5F2 0%, #FFF 100%);
+                }
+
+                .value-card.selected .value-name::before {
+                              content: '✓ ';
+                              color: var(--sunset-orange);
+                }
+
+                .value-name {
+                              font-weight: 600;
+                              color: var(--deep-brown);
+                              margin-bottom: 0.25rem;
+                }
+
+                .value-definition {
+                              font-size: 0.9rem;
+                              color: #666;
+                              line-height: 1.5;
+                }
+
+                /* Narrow screen */
+                .narrow-instruction {
+                              text-align: center;
+                              margin-bottom: 1.5rem;
+                }
+
+                .narrow-instruction h2 {
+                              font-family: 'Fraunces', serif;
+                              font-size: 1.5rem;
+                              margin-bottom: 0.5rem;
+                }
+
+                .narrow-values {
+                              display: flex;
+                              flex-direction: column;
+                              gap: 0.5rem;
+                              margin-bottom: 2rem;
+                }
+
+                .narrow-card {
+                              display: flex;
+                              align-items: center;
+                              gap: 1rem;
+                              background: white;
+                              border: 2px solid var(--light-gray);
+                              border-radius: 8px;
+                              padding: 1rem 1.25rem;
+                              cursor: pointer;
+                              transition: all 0.2s ease;
+                }
+
+                .narrow-card:hover {
+                              border-color: var(--sunset-coral);
+                }
+
+                .narrow-card.kept {
+                              border-color: var(--muted-sage);
+                              background: linear-gradient(135deg, #F0F7F4 0%, #FFF 100%);
+                }
+
+                .narrow-card.removed {
+                              opacity: 0.4;
+                              border-style: dashed;
+                }
+
+                .narrow-toggle {
+                              width: 24px;
+                              height: 24px;
+                              border-radius: 4px;
+                              border: 2px solid var(--light-gray);
+                              display: flex;
+                              align-items: center;
+                              justify-content: center;
+                              flex-shrink: 0;
+                              transition: all 0.2s ease;
+                }
+
+                .narrow-card.kept .narrow-toggle {
+                              background: var(--muted-sage);
+                              border-color: var(--muted-sage);
+                              color: white;
+                }
+
+                .narrow-info {
+                              flex: 1;
+                }
+
+                /* Results screen */
+                .results-content {
+                              text-align: center;
+                }
+
+                .results-content h2 {
+                              font-family: 'Fraunces', serif;
+                              font-size: 1.75rem;
+                              margin-bottom: 1rem;
+                }
+
+                .final-values {
+                              display: flex;
+                              flex-wrap: wrap;
+                              justify-content: center;
+                              gap: 0.75rem;
+                              margin: 2rem 0;
+                }
+
+                .final-value {
+                              background: linear-gradient(135deg, var(--sunset-orange) 0%, var(--sunset-coral) 100%);
+                              color: white;
+                              padding: 0.75rem 1.5rem;
+                              border-radius: 50px;
+                              font-weight: 600;
+                              font-size: 1.05rem;
+                }
+
+                .results-message {
+                              max-width: 500px;
+                              margin: 0 auto 2rem;
+                              color: #666;
+                }
+
+                .results-card {
+                              background: white;
+                              border-radius: 12px;
+                              padding: 2rem;
+                              margin: 2rem auto;
+                              max-width: 500px;
+                              box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+                }
+
+                .results-card h3 {
+                              font-family: 'Fraunces', serif;
+                              margin-bottom: 1rem;
+                              color: var(--deep-brown);
+                }
+
+                .results-list {
+                              text-align: left;
+                }
+
+                .results-list .value-item {
+                              padding: 0.75rem 0;
+                              border-bottom: 1px solid var(--light-gray);
+                }
+
+                .results-list .value-item:last-child {
+                              border-bottom: none;
+                }
+
+                .results-list .value-name {
+                              color: var(--sunset-orange);
+                }
+
+                /* Buttons */
+                .btn {
+                              display: inline-flex;
+                              align-items: center;
+                              gap: 0.5rem;
+                              padding: 0.875rem 2rem;
+                              border-radius: 8px;
+                              font-size: 1rem;
+                              font-weight: 600;
+                              cursor: pointer;
+                              transition: all 0.2s ease;
+                              border: none;
+                              font-family: inherit;
+                }
+
+                .btn-primary {
+                              background: var(--sunset-orange);
+                              color: white;
+                }
+
+                .btn-primary:hover {
+                              background: #c9694f;
+                              transform: translateY(-2px);
+                }
+
+                .btn-primary:disabled {
+                              background: var(--light-gray);
+                              color: #999;
+                              cursor: not-allowed;
+                              transform: none;
+                }
+
+                .btn-secondary {
+                              background: white;
+                              color: var(--deep-brown);
+                              border: 2px solid var(--light-gray);
+                }
+
+                .btn-secondary:hover {
+                              border-color: var(--sunset-coral);
+                }
+
+                .btn-group {
+                              display: flex;
+                              gap: 1rem;
+                              justify-content: center;
+                              flex-wrap: wrap;
+                              margin-top: 2rem;
+                }
+
+                /* Footer */
+                footer {
+                              text-align: center;
+                              margin-top: 4rem;
+                              padding-top: 2rem;
+                              border-top: 1px solid var(--light-gray);
+                }
+
+                .footer-logo {
+                              display: inline-block;
+                              transition: opacity 0.2s ease;
+                }
+
+                .footer-logo:hover {
+                              opacity: 0.8;
+                }
+
+                .footer-logo img {
+                              height: 60px;
+                              width: auto;
+                }
+
+                .footer-text {
+                              margin-top: 0.75rem;
+                              font-size: 0.85rem;
+                              color: #999;
+                }
+
+                /* Responsive */
+                @media (max-width: 600px) {
+                              .container {
+                                                padding: 1.5rem 1rem;
+                              }
+
+                              .values-grid {
+                                                grid-template-columns: 1fr;
+                              }
+
+                              .progress-step span:not(.step-number) {
+                                                display: none;
+                              }
+
+                              .btn {
+                                                padding: 0.75rem 1.5rem;
+                                                font-size: 0.95rem;
+                              }
+                }
+
+                /* Print/screenshot styles */
+                @media print {
+                              .btn, .progress-bar, footer {
+                                                display: none !important;
+                              }
+                }
+            </style>
+  </head>
+  <body>
+        <div class="container">
+                  <header>
+                                <h1>What R My Values?</h1>
+                              <p class="tagline">A tool for discovering what matters most to you</p>p>
+                  </header>
+        
+                <!-- Progress Bar -->
+                <div class="progress-bar">
+                            <div class="progress-step active" data-step="0">
+                                            <span class="step-number">1</span>span>
+                                            <span>Learn</span>
+                            </div>div>
+                            <div class="step-connector"></div>div>
+                            <div class="progress-step" data-step="1">
+                                            <span class="step-number">2</span>
+                                            <span>Select</span>
+                            </div>div>
+                            <div class="step-connector"></div>div>
+                            <div class="progress-step" data-step="2">
+                                            <span class="step-number">3</span>
+                                            <span>Narrow</span>
+                            </div>div>
+                            <div class="step-connector"></div>div>
+                            <div class="progress-step" data-step="3">
+                                            <span class="step-number">4</span>
+                                            <span>Results</span>
+                            </div>div>
+                </div>div>
+        
+                <!-- Screen 0: Intro -->
+                <div class="screen active" id="screen-intro">
+                            <div class="intro-content">
+                                            <p><strong>Values</strong> define how you want to behave—not what you want to achieve.</p>
+                                            <p>They guide your actions, your choices, and the compromises you're willing to make.</p>
+                                            <blockquote>
+                                                                  There are no "right" or "wrong" values. We all have different priorities. The goal is to identify <em>yours</em>.
+                                            </blockquote>
+                            
+                                            <p>This exercise will help you discover your core values in three steps:</p>
+                                            <p>
+                                                                  <strong>1.</strong> Browse a list of values and select any that resonate<br>
+                                                <strong>2.</strong> Narrow your selections down to your top 5<br>
+                                                <strong>3.</strong> Reflect on what you've discovered
+                                            </p>
+                            
+                                            <div class="btn-group">
+                                                                <button class="btn btn-primary" onclick="goToScreen(1)">
+                                                                                        Get Started →
+                                                                </button>button>
+                                            </div>div>
+                            </div>div>
+                </div>div>
+        
+                <!-- Screen 1: Select Values -->
+                <div class="screen" id="screen-select">
+                            <div class="values-instruction">
+                                            <h2>Select Your Values</h2>
+                                            <p>Click on any values that resonate with you. Don't overthink it—go with your gut.</p>
+                            </div>div>
+                            <div class="selection-count" id="selection-count">0 values selected</div>div>
+                            <div class="values-grid" id="values-grid">
+                                            <!-- Values will be populated by JavaScript -->
+                            </div>div>
+                
+                            <div class="btn-group">
+                                            <button class="btn btn-secondary" onclick="goToScreen(0)">← Back</button>button>
+                                            <button class="btn btn-primary" id="btn-to-narrow" onclick="goToScreen(2)" disabled>
+                                                                Continue with <span id="selected-count">0</span> values →
+                                            </button>button>
+                            </div>div>
+                </div>div>
+        
+                <!-- Screen 2: Narrow Down -->
+                <div class="screen" id="screen-narrow">
+                            <div class="narrow-instruction">
+                                            <h2>Narrow to Your Top 5</h2>
+                                            <p>This is the hard part. Click to keep or remove values until you have exactly 5.</p>
+                            </div>div>
+                
+                            <div class="selection-count" id="narrow-count">5 more to remove</div>div>
+                
+                            <div class="narrow-values" id="narrow-values">
+                                            <!-- Selected values will be populated here -->
+                            </div>div>
+                
+                            <div class="btn-group">
+                                            <button class="btn btn-secondary" onclick="goToScreen(1)">← Back</button>button>
+                                            <button class="btn btn-primary" id="btn-to-results" onclick="goToScreen(3)" disabled>
+                                                                See My Values →
+                                            </button>button>
+                            </div>div>
+                </div>div>
+        
+                <!-- Screen 3: Results -->
+                <div class="screen" id="screen-results">
+                            <div class="results-content">
+                                            <h2>Your Core Values</h2>
+                                            <div class="final-values" id="final-values">
+                                                                <!-- Final values will appear here -->
+                                            </div>div>
+                            
+                                            <p class="results-message">
+                                                                  These five values represent what matters most to you. They can guide your decisions, 
+                                                                  help you understand conflicts, and remind you who you want to be.
+                                            </p>
+
+                                              <div class="results-card" id="results-card">
+                                                                    <h3>My Values</h3>
+                                                                    <div class="results-list" id="results-list">
+                                                                                              <!-- Detailed results here -->
+                                                                    </div>div>
+                                              </div>div>
+
+                                              <div class="btn-group">
+                                                                    <button class="btn btn-secondary" onclick="goToScreen(2)">← Reconsider</button>button>
+                                                                    <button class="btn btn-secondary" onclick="copyResults()">📋 Copy Results</button>button>
+                                                                    <button class="btn btn-primary" onclick="startOver()">Start Over</button>button>
+                                              </div>div>
+                            </div>div>
+                </div>div>
+
+                  <footer>
+                                <a href="https://gamedevdolin.com" target="_blank" class="footer-logo" title="Made by Game Dev Dolin">
+                                                  <img src="GDD_logo1000px.png" alt="Game Dev Dolin" id="footer-logo-img">
+                                </a>a>
+                                <p class="footer-text">A tool by <a href="https://gamedevdolin.com" target="_blank" style="color: var(--sunset-orange); text-decoration: none;">Game Dev Dolin</a>a></p>p>
+                  </footer>
+        </div>div>
+
+        <script>
+                  // Values data
+                  const values = [
+                    { name: "Acceptance", definition: "To be open to and accepting of myself, others, life, etc." },
+                    { name: "Adventure", definition: "To be adventurous; to actively seek, create, or explore novel or stimulating experiences" },
+                    { name: "Assertiveness", definition: "To respectfully stand up for my rights and request what I want" },
+                    { name: "Authenticity", definition: "To be authentic, genuine, real; to be true to myself" },
+                    { name: "Beauty", definition: "To appreciate, create, nurture or cultivate beauty in myself, others, the environment, etc." },
+                    { name: "Caring", definition: "To be caring towards myself, others, the environment, etc." },
+                    { name: "Challenge", definition: "To keep challenging myself to grow, learn, improve" },
+                    { name: "Compassion", definition: "To act with kindness towards those who are suffering" },
+                    { name: "Connection", definition: "To engage fully in whatever I am doing, and be fully present with others" },
+                    { name: "Contribution", definition: "To contribute, help, assist, or make a positive difference to myself and others" },
+                    { name: "Conformity", definition: "To be respectful and obedient of rules and obligations" },
+                    { name: "Cooperation", definition: "To be cooperative and collaborative with others" },
+                    { name: "Courage", definition: "To be courageous or brave; to persist in the face of fear, threat, or difficulty" },
+                    { name: "Creativity", definition: "To be creative or innovative" },
+                    { name: "Curiosity", definition: "To be curious, open-minded and interested; to explore and discover" },
+                    { name: "Encouragement", definition: "To encourage and reward behavior that I value in myself or others" },
+                    { name: "Equality", definition: "To treat others as equal to myself, and vice-versa" },
+                    { name: "Excitement", definition: "To seek, create and engage in activities that are exciting, stimulating or thrilling" },
+                    { name: "Fairness", definition: "To be fair to myself or others" },
+                    { name: "Fitness", definition: "To maintain or improve my fitness; to look after my physical and mental health and wellbeing" },
+                    { name: "Flexibility", definition: "To adjust and adapt readily to changing circumstances" },
+                    { name: "Freedom", definition: "To live freely; to choose how I live and behave, or help others do likewise" },
+                    { name: "Friendliness", definition: "To be friendly, companionable, or agreeable towards others" },
+                    { name: "Forgiveness", definition: "To be forgiving towards myself or others" },
+                    { name: "Fun", definition: "To be fun-loving; to seek, create, and engage in fun-filled activities" },
+                    { name: "Generosity", definition: "To be generous, sharing and giving, to myself or others" },
+                    { name: "Gratitude", definition: "To be grateful for and appreciative of the positive aspects of myself, others and life" },
+                    { name: "Honesty", definition: "To be honest, truthful, and sincere with myself and others" },
+                    { name: "Humor", definition: "To see and appreciate the humorous side of life" },
+                    { name: "Humility", definition: "To be humble or modest; to let my achievements speak for themselves" },
+                    { name: "Industry", definition: "To be industrious, hard-working, dedicated" },
+                    { name: "Independence", definition: "To be self-supportive, and choose my own way of doing things" },
+                    { name: "Intimacy", definition: "To open up, reveal, and share myself—emotionally or physically—in my close personal relationships" },
+                    { name: "Justice", definition: "To uphold justice and fairness" },
+                    { name: "Kindness", definition: "To be kind, compassionate, considerate, nurturing or caring towards others" },
+                    { name: "Love", definition: "To act lovingly or affectionately towards myself or others" },
+                    { name: "Mindfulness", definition: "To be conscious of, open to, and curious about my here-and-now experience" },
+                    { name: "Order", definition: "To be orderly and organized" },
+                    { name: "Patience", definition: "To wait calmly for what I want" },
+                    { name: "Persistence", definition: "To continue resolutely, despite problems or difficulties" },
+                    { name: "Pleasure", definition: "To create and give pleasure to myself or others" },
+                    { name: "Power", definition: "To strongly influence or wield authority over others" },
+                    { name: "Reciprocity", definition: "To build relationships in which there is a fair balance of giving and taking" },
+                    { name: "Respect", definition: "To be respectful towards myself or others; to be polite, considerate and show positive regard" },
+                    { name: "Responsibility", definition: "To be responsible and accountable for my actions" },
+                    { name: "Romance", definition: "To be romantic; to display and express love or strong affection" },
+                    { name: "Safety", definition: "To secure, protect, or ensure safety of myself or others" },
+                    { name: "Self-awareness", definition: "To be aware of my own thoughts, feelings and actions" },
+                    { name: "Self-care", definition: "To look after my health and wellbeing, and get my needs met" },
+                    { name: "Self-development", definition: "To keep growing, advancing or improving in knowledge, skills, character, or life experience" },
+                    { name: "Sensuality", definition: "To create, explore and enjoy experiences that stimulate the five senses" },
+                    { name: "Sexuality", definition: "To explore or express my sexuality" },
+                    { name: "Spirituality", definition: "To connect with things bigger than myself" },
+                    { name: "Skillfulness", definition: "To continually practice and improve my skills, and apply myself fully when using them" },
+                    { name: "Supportiveness", definition: "To be supportive, helpful, encouraging, and available to myself or others" },
+                    { name: "Trust", definition: "To be trustworthy; to be loyal, faithful, sincere, and reliable" },
+                    { name: "Wealth", definition: "To acquire, create, save or increase wealth" },
+                    { name: "Wisdom", definition: "To gain and apply knowledge and experience" }
+                            ];
+
+                  // State
+                  let currentScreen = 0;
+                  let selectedValues = new Set();
+                  let keptValues = new Set();
+
+                  // Initialize
+                  function init() {
+                                renderValuesGrid();
+                  }
+
+                  // Render values grid
+                  function renderValuesGrid() {
+                                const grid = document.getElementById('values-grid');
+                                grid.innerHTML = values.map((value, index) => `
+                                                <div class="value-card ${selectedValues.has(index) ? 'selected' : ''}" 
+                                                                     onclick="toggleValue(${index})"
+                                                                                          data-index="${index}">
+                                                                                                              <div class="value-name">${value.name}</div>
+                                                                                                                                  <div class="value-definition">${value.definition}</div>
+                                                                                                                                                  </div>
+                                                                                                                                                              `).join('');
+                  }
+
+                  // Toggle value selection
+                  function toggleValue(index) {
+                                if (selectedValues.has(index)) {
+                                                  selectedValues.delete(index);
+                                } else {
+                                                  selectedValues.add(index);
+                                }
+                                const card = document.querySelector(`[data-index="${index}"]`);
+                                card.classList.toggle('selected');
+                                updateSelectionCount();
+                  }
+
+                  // Update selection count
+                  function updateSelectionCount() {
+                                const count = selectedValues.size;
+                                document.getElementById('selection-count').textContent = 
+                                                  count === 0 ? 'No values selected yet' :
+                                                  count === 1 ? '1 value selected' :
+                                                  `${count} values selected`;
+                                document.getElementById('selected-count').textContent = count;
+                                document.getElementById('btn-to-narrow').disabled = count < 5;
+                  }
+
+                  // Navigate to screen
+                  function goToScreen(screenIndex) {
+                                // Update progress
+                                document.querySelectorAll('.progress-step').forEach((step, i) => {
+                                                  step.classList.remove('active', 'completed');
+                                                  if (i < screenIndex) step.classList.add('completed');
+                                                  if (i === screenIndex) step.classList.add('active');
+                                });
+
+                                // Hide all screens
+                                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+
+                                // Show target screen
+                                const screens = ['screen-intro', 'screen-select', 'screen-narrow', 'screen-results'];
+                                document.getElementById(screens[screenIndex]).classList.add('active');
+
+                                // Screen-specific setup
+                                if (screenIndex === 2) {
+                                                  setupNarrowScreen();
+                                } else if (screenIndex === 3) {
+                                                  setupResultsScreen();
+                                }
+
+                                currentScreen = screenIndex;
+                                window.scrollTo(0, 0);
+                  }
+
+                  // Setup narrow screen
+                  function setupNarrowScreen() {
+                                keptValues = new Set(selectedValues);
+                                renderNarrowList();
+                  }
+
+                  // Render narrow list
+                  function renderNarrowList() {
+                                const container = document.getElementById('narrow-values');
+                                const valuesArray = Array.from(selectedValues);
+                                container.innerHTML = valuesArray.map(index => {
+                                                  const value = values[index];
+                                                  const isKept = keptValues.has(index);
+                                                  return `
+                                                                      <div class="narrow-card ${isKept ? 'kept' : 'removed'}" 
+                                                                                               onclick="toggleKept(${index})"
+                                                                                                                        data-narrow-index="${index}">
+                                                                                                                                                <div class="narrow-toggle">${isKept ? '✓' : ''}</div>
+                                                                                                                                                                        <div class="narrow-info">
+                                                                                                                                                                                                    <div class="value-name">${value.name}</div>
+                                                                                                                                                                                                                                <div class="value-definition">${value.definition}</div>
+                                                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                                            `;
+                                }).join('');
+
+                                updateNarrowCount();
+                  }
+
+                  // Toggle kept value
+                  function toggleKept(index) {
+                                if (keptValues.has(index)) {
+                                                  keptValues.delete(index);
+                                } else {
+                                                  keptValues.add(index);
+                                }
+                                const card = document.querySelector(`[data-narrow-index="${index}"]`);
+                                const isKept = keptValues.has(index);
+                                card.classList.toggle('kept', isKept);
+                                card.classList.toggle('removed', !isKept);
+                                card.querySelector('.narrow-toggle').textContent = isKept ? '✓' : '';
+                                updateNarrowCount();
+                  }
+
+                  // Update narrow count
+                  function updateNarrowCount() {
+                                const count = keptValues.size;
+                                const diff = count - 5;
+                                let message;
+                                if (diff > 0) {
+                                                  message = `Remove ${diff} more value${diff === 1 ? '' : 's'}`;
+                                } else if (diff < 0) {
+                                                  message = `Keep ${Math.abs(diff)} more value${Math.abs(diff) === 1 ? '' : 's'}`;
+                                } else {
+                                                  message = "Perfect! You have 5 values selected";
+                                }
+                                document.getElementById('narrow-count').textContent = message;
+                                document.getElementById('btn-to-results').disabled = count !== 5;
+                  }
+
+                  // Setup results screen
+                  function setupResultsScreen() {
+                                const finalContainer = document.getElementById('final-values');
+                                const listContainer = document.getElementById('results-list');
+                                const keptArray = Array.from(keptValues);
+                                finalContainer.innerHTML = keptArray.map(index => 
+                                                  `<span class="final-value">${values[index].name}</span>`
+                                                                                     ).join('');
+                                listContainer.innerHTML = keptArray.map(index => `
+                                                <div class="value-item">
+                                                                    <div class="value-name">${values[index].name}</div>
+                                                                                        <div class="value-definition">${values[index].definition}</div>
+                                                                                                        </div>
+                                                                                                                    `).join('');
+                  }
+
+                  // Copy results
+                  function copyResults() {
+                                const keptArray = Array.from(keptValues);
+                                const text = "My Core Values:\n\n" + keptArray.map(index => 
+                                                  `• ${values[index].name}: ${values[index].definition}`
+                                                                                               ).join('\n\n');
+                                navigator.clipboard.writeText(text).then(() => {
+                                                  alert('Values copied to clipboard!');
+                                }).catch(() => {
+                                                  // Fallback
+                                                  const textarea = document.createElement('textarea');
+                                                  textarea.value = text;
+                                                  document.body.appendChild(textarea);
+                                                  textarea.select();
+                                                  document.execCommand('copy');
+                                                  document.body.removeChild(textarea);
+                                                  alert('Values copied to clipboard!');
+                                });
+                  }
+
+                  // Start over
+                  function startOver() {
+                                selectedValues.clear();
+                                keptValues.clear();
+                                renderValuesGrid();
+                                updateSelectionCount();
+                                goToScreen(0);
+                  }
+
+                  // Initialize on load
+                  init();
+        </script>
+  </body>
+</html>html>
+        </script>
+                  </footer>
+                                            </p></p></strong></strong>
+                                            </p></p></em>
+                                            </blockquote></strong></p></span></span></h1>
+                  </header>
+  </body>
+      </style></title>
+  </head>
