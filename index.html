@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VALUES - A Quick Game of Self-Discovery</title>
+    <title>What Are My Core Values? - A Quick Game of Self-Discovery</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
@@ -47,7 +47,7 @@
 
         h1 {
             font-family: 'Fraunces', serif;
-            font-size: clamp(4rem, 10vw, 5.5rem);
+            font-size: clamp(2rem, 6vw, 3.25rem);
             color: var(--deep-brown);
             margin-bottom: 0.5rem;
         }
@@ -137,9 +137,10 @@
         }
 
         .intro-content p {
-            margin-bottom: 0.75rem;
-            font-size: 5rem;
-            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: clamp(1.4rem, 4vw, 1.75rem);
+            font-weight: 500;
+            line-height: 1.5;
         }
 
         .intro-content p:last-of-type {
@@ -147,7 +148,7 @@
         }
 
         .intro-content .btn-group {
-            margin-top: 4rem;
+            margin-top: 2.5rem;
         }
 
         .intro-content blockquote {
@@ -207,30 +208,33 @@
         }
 
         .values-grid {
-            display: grid;
-            grid-template-columns: 1fr;
+            display: flex;
+            flex-wrap: wrap;
             gap: 0.5rem;
             margin-bottom: 2rem;
+            justify-content: center;
+            align-items: flex-start;
         }
 
         .value-card {
             background: white;
             border: 2px solid var(--light-gray);
-            border-radius: 8px;
-            padding: 1rem 1.25rem;
+            border-radius: 24px;
+            padding: 0.5rem 1rem;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: border-radius 0.3s ease, padding 0.3s ease, border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+            user-select: none;
+            -webkit-user-select: none;
+            flex: 0 0 auto;
         }
 
         .value-card:hover {
             border-color: var(--sunset-coral);
         }
 
-        @media (min-width: 601px) {
-            .value-card:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            }
+        .value-card.expanded {
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
         }
 
         .value-card.selected {
@@ -238,21 +242,55 @@
             background: linear-gradient(135deg, #FFF5F2 0%, #FFF 100%);
         }
 
-        .value-card.selected .value-name::before {
-            content: '✓ ';
-            color: var(--sunset-orange);
-        }
-
         .value-name {
             font-weight: 600;
+            font-size: 0.95rem;
             color: var(--deep-brown);
-            margin-bottom: 0.25rem;
+            display: inline;
+        }
+
+        .value-expand-area {
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease 0.05s;
+        }
+
+        .value-card.expanded .value-expand-area {
+            opacity: 1;
         }
 
         .value-definition {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #666;
-            line-height: 1.5;
+            line-height: 1.4;
+            padding-top: 0.4rem;
+            white-space: normal;
+            min-width: 200px;
+        }
+
+        .value-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding-top: 0.5rem;
+            padding-bottom: 0.25rem;
+            font-size: 0.85rem;
+            color: var(--deep-brown);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .value-checkbox input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--sunset-orange);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .value-checkbox label {
+            cursor: pointer;
         }
 
         /* Narrow screen */
@@ -627,8 +665,9 @@
                 padding: 2rem 1.5rem;
             }
 
-            .values-grid {
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            .value-card:not(.expanded):hover {
+                transform: translateY(-1px);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             }
 
             .selection-count {
@@ -656,19 +695,12 @@
                 display: none;
             }
 
-            .values-grid {
-                grid-template-columns: 1fr;
-                gap: 0.5rem;
-            }
-
             .value-card {
-                padding: 1rem;
-                min-height: 44px;
                 -webkit-tap-highlight-color: transparent;
             }
 
-            .value-card:active {
-                transform: scale(0.98);
+            .value-card:active:not(.expanded) {
+                transform: scale(0.97);
             }
 
             .narrow-card {
@@ -713,7 +745,7 @@
             }
 
             h1 {
-                font-size: 3.5rem;
+                font-size: 2rem;
             }
 
             .tagline {
@@ -874,7 +906,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>VALUES</h1>
+            <h1>What are my core values?</h1>
             <p class="tagline">A Quick Game of Self-Discovery</p>
         </header>
 
@@ -1363,37 +1395,173 @@
             });
         }
 
+        // Track which card is currently expanded
+        let expandedCardIndex = null;
+        const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
         // Render values grid
         function renderValuesGrid() {
             const grid = document.getElementById('values-grid');
             grid.innerHTML = values.map((value, index) => `
                 <div class="value-card ${selectedValues.has(index) ? 'selected' : ''}"
-                     onclick="toggleValue(${index})"
                      data-index="${index}">
                     <div class="value-name">${value.name}</div>
-                    <div class="value-definition">${value.definition}</div>
                 </div>
             `).join('');
+
+            // Attach expand/collapse handlers
+            grid.querySelectorAll('.value-card').forEach(card => {
+                const index = parseInt(card.dataset.index);
+
+                if (isTouchDevice) {
+                    card.addEventListener('click', (e) => {
+                        if (e.target.closest('.value-checkbox')) return;
+                        handleCardTap(index, card);
+                    });
+                } else {
+                    card.addEventListener('mouseenter', () => {
+                        // Collapse any other expanded card first
+                        if (expandedCardIndex !== null && expandedCardIndex !== index) {
+                            const prev = document.querySelector(`[data-index="${expandedCardIndex}"]`);
+                            if (prev && !selectedValues.has(expandedCardIndex)) {
+                                collapseCard(expandedCardIndex, prev);
+                            }
+                        }
+                        expandCard(index, card);
+                    });
+                    card.addEventListener('mouseleave', (e) => {
+                        if (selectedValues.has(index)) return;
+                        // Check if we actually left the card (not just moved to a child)
+                        const related = e.relatedTarget;
+                        if (related && card.contains(related)) return;
+                        collapseCard(index, card);
+                    });
+                    card.addEventListener('click', (e) => {
+                        if (e.target.closest('.value-checkbox')) return;
+                        const cb = card.querySelector('input[type="checkbox"]');
+                        if (cb) {
+                            cb.checked = !cb.checked;
+                            toggleValue(index, cb.checked);
+                        }
+                    });
+                }
+            });
         }
 
-        // Toggle value selection
-        function toggleValue(index) {
-            if (selectedValues.has(index)) {
-                selectedValues.delete(index);
+        function createExpandArea(index) {
+            const value = values[index];
+            const area = document.createElement('div');
+            area.className = 'value-expand-area';
+            area.innerHTML = `
+                <div class="value-definition">${value.definition}</div>
+                <div class="value-checkbox" onclick="event.stopPropagation()">
+                    <input type="checkbox" id="cb-${index}" ${selectedValues.has(index) ? 'checked' : ''}
+                           onchange="toggleValue(${index}, this.checked)">
+                    <label for="cb-${index}">This resonates with me</label>
+                </div>
+            `;
+            return area;
+        }
+
+        function expandCard(index, card) {
+            // Don't re-expand if already expanded
+            if (card.classList.contains('expanded')) return;
+
+            let expandArea = card.querySelector('.value-expand-area');
+            const isNew = !expandArea;
+
+            if (isNew) {
+                expandArea = createExpandArea(index);
+                card.appendChild(expandArea);
+            }
+
+            // Measure: temporarily make visible off-flow to get natural height
+            expandArea.style.transition = 'none';
+            expandArea.style.maxHeight = 'none';
+            expandArea.style.opacity = '0';
+            expandArea.style.position = 'absolute';
+            expandArea.style.visibility = 'hidden';
+            expandArea.offsetHeight; // force reflow
+            const targetHeight = expandArea.scrollHeight;
+
+            // Reset to collapsed state
+            expandArea.style.maxHeight = '0';
+            expandArea.style.position = '';
+            expandArea.style.visibility = '';
+            expandArea.offsetHeight; // force reflow at 0
+
+            // Now animate to target
+            expandArea.style.transition = '';
+            card.classList.add('expanded');
+            expandArea.style.maxHeight = targetHeight + 'px';
+            expandArea.style.opacity = '1';
+
+            expandedCardIndex = index;
+        }
+
+        function collapseCard(index, card) {
+            const expandArea = card.querySelector('.value-expand-area');
+            card.classList.remove('expanded');
+            if (expandedCardIndex === index) expandedCardIndex = null;
+
+            if (expandArea) {
+                expandArea.style.maxHeight = '0';
+                expandArea.style.opacity = '0';
+                // Remove after animation (350ms matches CSS transition + buffer)
+                setTimeout(() => {
+                    // Only remove if still collapsed
+                    if (!card.classList.contains('expanded')) {
+                        expandArea.remove();
+                    }
+                }, 350);
+            }
+        }
+
+        function handleCardTap(index, card) {
+            if (card.classList.contains('expanded')) {
+                // Tapping an expanded, unselected card collapses it
+                if (!selectedValues.has(index)) {
+                    collapseCard(index, card);
+                }
             } else {
-                // Don't allow more than 10 selections
+                // Collapse any other expanded card (that isn't selected)
+                if (expandedCardIndex !== null && expandedCardIndex !== index) {
+                    const prev = document.querySelector(`[data-index="${expandedCardIndex}"]`);
+                    if (prev && !selectedValues.has(expandedCardIndex)) {
+                        collapseCard(expandedCardIndex, prev);
+                    }
+                }
+                expandCard(index, card);
+            }
+        }
+
+        // Toggle value selection via checkbox
+        function toggleValue(index, checked) {
+            if (checked) {
                 if (selectedValues.size >= 10) {
+                    // Revert checkbox
+                    const cb = document.getElementById(`cb-${index}`);
+                    if (cb) cb.checked = false;
                     const countEl = document.getElementById('selection-count');
                     countEl.classList.remove('pulse');
-                    void countEl.offsetWidth; // Force reflow to restart animation
+                    void countEl.offsetWidth;
                     countEl.classList.add('pulse');
                     return;
                 }
                 selectedValues.add(index);
+            } else {
+                selectedValues.delete(index);
+                // On mobile, collapse when deselecting
+                if (isTouchDevice) {
+                    const card = document.querySelector(`[data-index="${index}"]`);
+                    if (card) collapseCard(index, card);
+                }
             }
 
             const card = document.querySelector(`[data-index="${index}"]`);
-            card.classList.toggle('selected');
+            if (card) {
+                card.classList.toggle('selected', selectedValues.has(index));
+            }
 
             updateSelectionCount();
         }
