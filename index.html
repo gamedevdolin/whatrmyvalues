@@ -944,7 +944,7 @@
                 <p></p>
             </div>
 
-            <div class="selection-count" id="selection-count">Which of these values<br><strong>resonate with you?</strong></div>
+            <div class="selection-count" id="selection-count">Choose 10 values that resonate with you</div>
 
             <div class="values-grid" id="values-grid">
                 <!-- Values will be populated by JavaScript -->
@@ -1584,17 +1584,10 @@
             const clearBtn = document.getElementById('btn-clear-all');
 
             if (count === 0) {
-                if (isSticky) {
-                    countEl.innerHTML = 'Tap on 10 values that resonate';
-                } else {
-                    countEl.innerHTML = 'Which of these values<br><strong>resonate with you?</strong>';
-                }
+                countEl.innerHTML = 'Choose 10 values that resonate with you';
                 clearBtn.style.display = 'none';
-            } else if (count >= 8) {
-                countEl.innerHTML = `<span class="count-number">${count}/10</span> values selected`;
-                clearBtn.style.display = 'inline-flex';
             } else {
-                countEl.innerHTML = `<span class="count-number">${count}</span> value${count === 1 ? '' : 's'} selected`;
+                countEl.innerHTML = `<span class="count-number">${count}/10</span> values selected`;
                 clearBtn.style.display = 'inline-flex';
             }
         }
