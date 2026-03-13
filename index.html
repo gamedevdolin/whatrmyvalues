@@ -1405,6 +1405,7 @@
 
         // Track which card is currently expanded
         let expandedCardIndex = null;
+        let hoverExpandTimer = null;
         const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
         // Render values grid
@@ -1428,16 +1429,20 @@
                     });
                 } else {
                     card.addEventListener('mouseenter', () => {
-                        // Collapse any other expanded card first
-                        if (expandedCardIndex !== null && expandedCardIndex !== index) {
-                            const prev = document.querySelector(`[data-index="${expandedCardIndex}"]`);
-                            if (prev && !selectedValues.has(expandedCardIndex)) {
-                                collapseCard(expandedCardIndex, prev);
+                        clearTimeout(hoverExpandTimer);
+                        hoverExpandTimer = setTimeout(() => {
+                            // Collapse any other expanded card first
+                            if (expandedCardIndex !== null && expandedCardIndex !== index) {
+                                const prev = document.querySelector(`[data-index="${expandedCardIndex}"]`);
+                                if (prev && !selectedValues.has(expandedCardIndex)) {
+                                    collapseCard(expandedCardIndex, prev);
+                                }
                             }
-                        }
-                        expandCard(index, card);
+                            expandCard(index, card);
+                        }, 300);
                     });
                     card.addEventListener('mouseleave', (e) => {
+                        clearTimeout(hoverExpandTimer);
                         if (selectedValues.has(index)) return;
                         // Check if we actually left the card (not just moved to a child)
                         const related = e.relatedTarget;
