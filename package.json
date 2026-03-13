@@ -1,0 +1,7 @@
+{
+  "name": "whatrmyvalues",
+  "private": true,
+  "dependencies": {
+    "@netlify/neon": "^0.1.0"
+  }
+}

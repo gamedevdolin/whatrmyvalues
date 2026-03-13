@@ -575,6 +575,74 @@
         }
         end kindred spirits */
 
+        /* Feedback form */
+        .feedback-section {
+            margin-top: 2.5rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--light-gray);
+            text-align: center;
+        }
+
+        .feedback-section h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.15rem;
+            margin-bottom: 0.25rem;
+            color: var(--deep-brown);
+        }
+
+        .feedback-section .feedback-subtitle {
+            font-size: 0.85rem;
+            color: #999;
+            margin-bottom: 1.25rem;
+        }
+
+        .feedback-form {
+            max-width: 400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .feedback-form textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 0.75rem;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            resize: vertical;
+            color: var(--deep-brown);
+        }
+
+        .feedback-form textarea:focus,
+        .feedback-form input:focus {
+            outline: none;
+            border-color: var(--ocean-blue);
+        }
+
+        .feedback-form input[type="email"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            color: var(--deep-brown);
+        }
+
+        .feedback-success {
+            color: var(--muted-sage);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .feedback-error {
+            color: var(--sunset-orange);
+            font-size: 0.9rem;
+        }
+
         /* Buttons */
         .btn {
             display: inline-flex;
@@ -1024,6 +1092,17 @@
                     </div>
                 </div>
                 -->
+
+                <div class="feedback-section" id="feedback-section">
+                    <h3>Share your thoughts</h3>
+                    <p class="feedback-subtitle">Your values are shared anonymously to help improve this tool</p>
+                    <form class="feedback-form" id="feedback-form" onsubmit="submitFeedback(event)">
+                        <textarea id="feedback-text" placeholder="Any feedback? What worked, what didn't..." rows="3"></textarea>
+                        <input type="email" id="feedback-email" placeholder="Email (optional)">
+                        <button type="submit" class="btn btn-primary btn-small" id="feedback-submit">Submit</button>
+                    </form>
+                    <div id="feedback-status"></div>
+                </div>
 
                 <div class="btn-group results-buttons" id="results-buttons">
                     <div class="btn-row">
@@ -2117,6 +2196,37 @@
         }
 
         // Start over
+        async function submitFeedback(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('feedback-submit');
+            const statusEl = document.getElementById('feedback-status');
+            const feedbackText = document.getElementById('feedback-text').value.trim();
+            const email = document.getElementById('feedback-email').value.trim();
+
+            const userValues = Array.from(finalValues).map(index => values[index].name);
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            statusEl.innerHTML = '';
+
+            try {
+                const res = await fetch('/api/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ values: userValues, feedback: feedbackText, email: email })
+                });
+
+                if (!res.ok) throw new Error('Failed');
+
+                document.getElementById('feedback-form').style.display = 'none';
+                statusEl.innerHTML = '<p class="feedback-success">Thanks for your feedback!</p>';
+            } catch (err) {
+                statusEl.innerHTML = '<p class="feedback-error">Something went wrong. Please try again.</p>';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit';
+            }
+        }
+
         function startOver() {
             selectedValues.clear();
             keptValues.clear();
@@ -2127,6 +2237,12 @@
             }
             renderValuesGrid();
             updateSelectionCount();
+            // Reset feedback form
+            document.getElementById('feedback-form').style.display = '';
+            document.getElementById('feedback-form').reset();
+            document.getElementById('feedback-submit').disabled = false;
+            document.getElementById('feedback-submit').textContent = 'Submit';
+            document.getElementById('feedback-status').innerHTML = '';
             goToScreen(0);
         }
 
