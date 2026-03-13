@@ -20,16 +20,19 @@ export default async (req) => {
     await sql`
       CREATE TABLE IF NOT EXISTS feedback (
         id SERIAL PRIMARY KEY,
-        values_list TEXT[] NOT NULL,
+        values_list TEXT NOT NULL,
         feedback_text TEXT,
         email TEXT,
         created_at TIMESTAMPTZ DEFAULT NOW()
       )
     `;
 
+    // Store values as comma-separated string to avoid array type issues
+    const valuesStr = values.join(", ");
+
     await sql`
       INSERT INTO feedback (values_list, feedback_text, email)
-      VALUES (${values}, ${feedback || null}, ${email || null})
+      VALUES (${valuesStr}, ${feedback || null}, ${email || null})
     `;
 
     return new Response(JSON.stringify({ success: true }), {
