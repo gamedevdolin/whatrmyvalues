@@ -479,7 +479,7 @@
             color: var(--sunset-orange);
         }
 
-        /* Kindred Spirits */
+        /* Kindred Spirits - commented out for now
         .kindred-section {
             margin-top: 2.5rem;
             text-align: center;
@@ -573,6 +573,7 @@
             color: white;
             font-weight: 500;
         }
+        end kindred spirits */
 
         /* Buttons */
         .btn {
@@ -923,16 +924,12 @@
         <!-- Screen 0: Intro -->
         <div class="screen active" id="screen-intro">
             <div class="intro-content">
-                <p>There are no "right" values.</p>
-                <p>There are no "wrong" values.</p>
-                <p>Everyone has different priorities.</p>
-                <p>The goal is to identify <em>yours</em>.</p>
-
                 <div class="btn-group btn-group-inline">
                     <button class="btn btn-primary" onclick="goToScreen(1)">
                         Begin →
                     </button>
                 </div>
+                <p style="margin-top: 1.5rem; font-size: 0.8rem; color: #999;">This tool is a work in progress and currently works better on mobile.</p>
             </div>
         </div>
 
@@ -1019,13 +1016,14 @@
                     help you understand conflicts, and remind you who you want to be.
                 </p>
 
+                <!-- Kindred spirits - commented out for now
                 <div class="kindred-section" id="kindred-section">
                     <h3>You might enjoy exploring...</h3>
                     <p class="kindred-intro">Based on your values, here are some kindred spirits</p>
                     <div class="kindred-matches" id="kindred-matches">
-                        <!-- Populated by JS -->
                     </div>
                 </div>
+                -->
 
                 <div class="btn-group results-buttons" id="results-buttons">
                     <div class="btn-row">
@@ -1120,8 +1118,8 @@
             { name: "Wisdom", definition: "To gain and apply knowledge and experience" }
         ];
 
-        // Kindred spirits profiles (philosophical schools and fictional characters)
-        const kindredProfiles = [
+        // Kindred spirits - commented out for now
+        /* const kindredProfiles = [
             // Philosophical schools (15)
             {
                 name: "Stoicism",
@@ -1334,7 +1332,7 @@
                 description: "Fight for those who cannot fight for themselves. Lead with compassion, truth, and unwavering courage.",
                 values: ["Fairness", "Courage", "Empathy", "Honesty", "Love"]
             }
-        ];
+        ]; */
 
         // State
         let currentScreen = 0;
@@ -1826,7 +1824,7 @@
         //     }, 1000);
         // }
 
-        // Find kindred spirit matches based on user's values
+        /* Kindred spirits functions - commented out for now
         function findKindredMatches(userValueNames) {
             const matches = kindredProfiles.map(profile => {
                 const matchingValues = profile.values.filter(v => userValueNames.includes(v));
@@ -1837,10 +1835,8 @@
                 };
             });
 
-            // Sort by match count, then prefer variety (1 philosophy, 1 character if possible)
             matches.sort((a, b) => b.matchCount - a.matchCount);
 
-            // Get top matches, trying to include both types
             const topMatches = [];
             const philosophies = matches.filter(m => m.type === 'philosophy' && m.matchCount > 0);
             const characters = matches.filter(m => m.type === 'character' && m.matchCount > 0);
@@ -1848,7 +1844,6 @@
             if (philosophies.length > 0) topMatches.push(philosophies[0]);
             if (characters.length > 0) topMatches.push(characters[0]);
 
-            // If we only got one type, add another from the same type
             if (topMatches.length < 2) {
                 const remaining = matches.filter(m => !topMatches.includes(m) && m.matchCount > 0);
                 if (remaining.length > 0) topMatches.push(remaining[0]);
@@ -1857,7 +1852,6 @@
             return topMatches.slice(0, 2);
         }
 
-        // Render kindred spirits section
         function renderKindredSpirits(userValueNames) {
             const container = document.getElementById('kindred-matches');
             const matches = findKindredMatches(userValueNames);
@@ -1882,6 +1876,7 @@
                 </div>
             `).join('');
         }
+        */
 
         // Setup results screen
         function setupResultsScreen() {
@@ -1898,8 +1893,8 @@
                 </div>
             `).join('');
 
-            // Render kindred spirits
-            renderKindredSpirits(userValueNames);
+            // Render kindred spirits - commented out for now
+            // renderKindredSpirits(userValueNames);
 
             // Hide buttons initially
             buttonsEl.classList.remove('visible');
@@ -1946,7 +1941,7 @@
             const container = document.getElementById('share-image-container');
             const finalArray = Array.from(finalValues);
             const userValueNames = finalArray.map(index => values[index].name);
-            const kindredMatches = findKindredMatches(userValueNames);
+            // const kindredMatches = findKindredMatches(userValueNames);
 
             // Create canvas
             const canvas = document.createElement('canvas');
@@ -2025,38 +2020,32 @@
                 y += 90;
             });
 
-            // Kindred Spirits section
+            /* Kindred Spirits section - commented out for now
             if (kindredMatches.length > 0) {
                 y += 20;
 
-                // Section title
                 ctx.fillStyle = '#3D2C29';
                 ctx.font = 'bold 36px Fraunces, Georgia, serif';
                 ctx.fillText('Kindred Spirits', width / 2, y);
                 y += 50;
 
-                // Draw each kindred match
                 kindredMatches.forEach((match, i) => {
                     const cardX = 80;
                     const cardWidth = width - 160;
                     const cardHeight = 180;
 
-                    // Card background
                     ctx.fillStyle = 'white';
                     roundRect(ctx, cardX, y, cardWidth, cardHeight, 16);
                     ctx.fill();
 
-                    // Left border accent
                     ctx.fillStyle = match.type === 'philosophy' ? '#81B29A' : '#F4A261';
                     ctx.fillRect(cardX, y, 6, cardHeight);
 
-                    // Name
                     ctx.fillStyle = '#3D2C29';
                     ctx.font = 'bold 28px DM Sans, sans-serif';
                     ctx.textAlign = 'left';
                     ctx.fillText(match.name, cardX + 24, y + 40);
 
-                    // Type badge
                     const typeText = match.type === 'philosophy' ? 'Philosophy' : 'Character';
                     ctx.font = '18px DM Sans, sans-serif';
                     const badgeWidth = ctx.measureText(typeText).width + 20;
@@ -2066,7 +2055,6 @@
                     ctx.fillStyle = match.type === 'philosophy' ? '#2E7D32' : '#E65100';
                     ctx.fillText(typeText, cardX + cardWidth - badgeWidth - 14, y + 40);
 
-                    // Description
                     ctx.fillStyle = '#666666';
                     ctx.font = '22px DM Sans, sans-serif';
                     ctx.textAlign = 'left';
@@ -2088,7 +2076,6 @@
                     });
                     ctx.fillText(descLine.trim(), cardX + 24, descY);
 
-                    // Matching values pills
                     let pillX = cardX + 24;
                     const pillY = y + cardHeight - 40;
                     ctx.font = '16px DM Sans, sans-serif';
@@ -2107,6 +2094,7 @@
                     y += cardHeight + 20;
                 });
             }
+            */
 
             // Footer
             ctx.fillStyle = '#999999';
