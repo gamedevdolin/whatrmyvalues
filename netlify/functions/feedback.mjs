@@ -17,6 +17,8 @@ export default async (req) => {
 
     const sql = neon();
 
+    // One-time migration: drop old table with TEXT[] column and recreate with TEXT
+    await sql`DROP TABLE IF EXISTS feedback`;
     await sql`
       CREATE TABLE IF NOT EXISTS feedback (
         id SERIAL PRIMARY KEY,
