@@ -4,6 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>What Are My Core Values? - A Quick Game of Self-Discovery</title>
+    <meta name="description" content="A free, interactive card-sorting tool that helps you discover your top 3 core values in about 5 minutes.">
+    <link rel="canonical" href="https://whataremycorevalues.org/">
+    <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://whataremycorevalues.org/">
+    <meta property="og:title" content="What Are My Core Values?">
+    <meta property="og:description" content="A quick game of self-discovery — narrow 57 values down to your top 3 in about 5 minutes.">
+    <meta property="og:image" content="https://whataremycorevalues.org/images/og.png">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="What Are My Core Values?">
+    <meta name="twitter:description" content="A quick game of self-discovery — narrow 57 values down to your top 3 in about 5 minutes.">
+    <meta name="twitter:image" content="https://whataremycorevalues.org/images/og.png">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
@@ -178,6 +195,17 @@
 
         .value-card:hover {
             border-color: var(--sunset-coral);
+        }
+
+        .value-card:focus-visible,
+        .narrow-card:focus-visible {
+            outline: 2px solid var(--sunset-orange);
+            outline-offset: 2px;
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--deep-brown);
+            outline-offset: 2px;
         }
 
         .value-card.expanded {
@@ -442,6 +470,18 @@
             font-family: 'DM Sans', sans-serif;
             font-size: 0.9rem;
             color: var(--deep-brown);
+        }
+
+        .feedback-word-count {
+            font-size: 0.75rem;
+            color: #999;
+            text-align: right;
+            margin-top: -0.25rem;
+        }
+
+        .feedback-word-count.over {
+            color: var(--sunset-orange);
+            font-weight: 600;
         }
 
         .feedback-success {
@@ -889,8 +929,9 @@
                     <h3>Share your thoughts</h3>
                     <p class="feedback-subtitle">Your values are shared anonymously to help improve this tool</p>
                     <form class="feedback-form" id="feedback-form" onsubmit="submitFeedback(event)">
-                        <textarea id="feedback-text" placeholder="Any feedback? What worked, what didn't..." rows="3"></textarea>
-                        <input type="email" id="feedback-email" placeholder="Email (optional)">
+                        <textarea id="feedback-text" placeholder="Any feedback? What worked, what didn't..." rows="3" oninput="updateFeedbackCount()"></textarea>
+                        <div class="feedback-word-count" id="feedback-word-count">0 / 500 words</div>
+                        <input type="email" id="feedback-email" placeholder="Email (optional)" autocomplete="email">
                         <button type="submit" class="btn btn-primary btn-small" id="feedback-submit">Submit</button>
                     </form>
                     <div id="feedback-status"></div>
@@ -998,16 +1039,72 @@
         // Track sticky state
         let isSticky = false;
 
+        // --- Progress persistence ---
+        const STORAGE_KEY = 'wamcv-progress-v1';
+
+        function saveProgress() {
+            try {
+                const toNames = (set) => [...set].map(i => values[i] && values[i].name).filter(Boolean);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    v: 1,
+                    screen: currentScreen,
+                    selected: toNames(selectedValues),
+                    kept: toNames(keptValues),
+                    final: toNames(finalValues),
+                }));
+            } catch (e) { /* storage unavailable — ignore */ }
+        }
+
+        function loadProgress() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                const state = JSON.parse(raw);
+                if (state.v !== 1) return;
+                const nameToIndex = new Map(values.map((v, i) => [v.name, i]));
+                const toSet = (names) => new Set((names || []).map(n => nameToIndex.get(n)).filter(i => i !== undefined));
+                selectedValues = toSet(state.selected);
+                keptValues = toSet(state.kept);
+                finalValues = toSet(state.final);
+                currentScreen = Math.max(0, Math.min(4, state.screen | 0));
+            } catch (e) { /* corrupt storage — ignore */ }
+        }
+
+        function clearProgress() {
+            try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+        }
+
         // Initialize
         function init() {
+            loadProgress();
             renderValuesGrid();
+            updateSelectionCount();
             setupStickyObserver();
+            setupKeyboardActivation();
 
             // Add scroll listener for results screen buttons
             window.addEventListener('scroll', () => {
                 if (currentScreen === 4) {
                     checkResultsScroll();
                 }
+            });
+
+            // Resume from saved screen
+            if (currentScreen > 0) {
+                const resumeTo = currentScreen;
+                currentScreen = 0;
+                goToScreen(resumeTo);
+            }
+        }
+
+        // Enter/Space activate role="button" cards
+        function setupKeyboardActivation() {
+            document.addEventListener('keydown', (e) => {
+                if (e.key !== 'Enter' && e.key !== ' ') return;
+                const card = e.target.closest('.value-card, .narrow-card');
+                if (!card) return;
+                e.preventDefault();
+                card.click();
             });
         }
 
@@ -1030,59 +1127,29 @@
 
         // Track which card is currently expanded
         let expandedCardIndex = null;
-        let hoverExpandTimer = null;
-        const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
         // Render values grid
         function renderValuesGrid() {
             const grid = document.getElementById('values-grid');
             grid.innerHTML = values.map((value, index) => `
                 <div class="value-card ${selectedValues.has(index) ? 'selected' : ''}"
-                     data-index="${index}">
+                     data-index="${index}"
+                     role="button"
+                     tabindex="0"
+                     aria-pressed="${selectedValues.has(index)}"
+                     aria-label="${value.name}">
                     <div class="value-name">${value.name}</div>
                 </div>
             `).join('');
 
-            // Attach expand/collapse handlers
+            // Click = expand/collapse on both desktop and mobile.
+            // Checkbox (inside expanded area) toggles selection.
             grid.querySelectorAll('.value-card').forEach(card => {
                 const index = parseInt(card.dataset.index);
-
-                if (isTouchDevice) {
-                    card.addEventListener('click', (e) => {
-                        if (e.target.closest('.value-checkbox')) return;
-                        handleCardTap(index, card);
-                    });
-                } else {
-                    card.addEventListener('mouseenter', () => {
-                        clearTimeout(hoverExpandTimer);
-                        hoverExpandTimer = setTimeout(() => {
-                            // Collapse any other expanded card first
-                            if (expandedCardIndex !== null && expandedCardIndex !== index) {
-                                const prev = document.querySelector(`[data-index="${expandedCardIndex}"]`);
-                                if (prev && !selectedValues.has(expandedCardIndex)) {
-                                    collapseCard(expandedCardIndex, prev);
-                                }
-                            }
-                            expandCard(index, card);
-                        }, 300);
-                    });
-                    card.addEventListener('mouseleave', (e) => {
-                        clearTimeout(hoverExpandTimer);
-                        if (selectedValues.has(index)) return;
-                        // Check if we actually left the card (not just moved to a child)
-                        const related = e.relatedTarget;
-                        if (related && card.contains(related)) return;
-                        collapseCard(index, card);
-                    });
-                    card.addEventListener('click', (e) => {
-                        if (e.target.closest('.value-checkbox')) return;
-                        const cb = card.querySelector('input[type="checkbox"]');
-                        if (cb) {
-                            cb.checked = !cb.checked;
-                            toggleValue(index, cb.checked);
-                        }
-                    });
-                }
+                card.addEventListener('click', (e) => {
+                    if (e.target.closest('.value-checkbox')) return;
+                    handleCardTap(index, card);
+                });
             });
         }
 
@@ -1192,19 +1259,19 @@
                 selectedValues.add(index);
             } else {
                 selectedValues.delete(index);
-                // On mobile, collapse when deselecting
-                if (isTouchDevice) {
-                    const card = document.querySelector(`[data-index="${index}"]`);
-                    if (card) collapseCard(index, card);
-                }
+                // Collapse on deselect so the grid stays tidy
+                const cardEl = document.querySelector(`[data-index="${index}"]`);
+                if (cardEl) collapseCard(index, cardEl);
             }
 
             const card = document.querySelector(`[data-index="${index}"]`);
             if (card) {
                 card.classList.toggle('selected', selectedValues.has(index));
+                card.setAttribute('aria-pressed', selectedValues.has(index));
             }
 
             updateSelectionCount();
+            saveProgress();
         }
 
         // Update selection count
@@ -1227,6 +1294,7 @@
             selectedValues.clear();
             renderValuesGrid();
             updateSelectionCount();
+            saveProgress();
         }
 
         // Try to continue - check if enough values selected
@@ -1265,6 +1333,7 @@
 
             currentScreen = screenIndex;
             window.scrollTo(0, 0);
+            saveProgress();
         }
 
         // Setup narrow screen
@@ -1298,7 +1367,10 @@
                 return `
                     <div class="narrow-card ${isKept ? 'kept' : 'removed'}"
                          onclick="toggleKept(${index})"
-                         data-narrow-index="${index}">
+                         data-narrow-index="${index}"
+                         role="button"
+                         tabindex="0"
+                         aria-pressed="${isKept}">
                         <div class="narrow-toggle">${isKept ? '✓' : ''}</div>
                         <div class="narrow-info">
                             <div class="value-name">${value.name}</div>
@@ -1321,6 +1393,7 @@
 
             // Re-render to reorder (removed values move to bottom)
             renderNarrowList();
+            saveProgress();
         }
 
         // Update narrow count
@@ -1362,7 +1435,10 @@
                 return `
                     <div class="narrow-card ${isKept ? 'kept' : 'removed'}"
                          onclick="toggleFinal(${index})"
-                         data-timed-index="${index}">
+                         data-timed-index="${index}"
+                         role="button"
+                         tabindex="0"
+                         aria-pressed="${isKept}">
                         <div class="narrow-toggle">${isKept ? '✓' : ''}</div>
                         <div class="narrow-info">
                             <div class="value-name">${value.name}</div>
@@ -1387,9 +1463,11 @@
             const isKept = finalValues.has(index);
             card.classList.toggle('kept', isKept);
             card.classList.toggle('removed', !isKept);
+            card.setAttribute('aria-pressed', isKept);
             card.querySelector('.narrow-toggle').textContent = isKept ? '✓' : '';
 
             updateTimedCount();
+            saveProgress();
         }
 
         // Update timed count
@@ -1566,13 +1644,38 @@
             document.getElementById('share-modal').classList.remove('active');
         }
 
-        // Start over
+        // Count words (whitespace-separated, non-empty)
+        function countWords(text) {
+            return text.trim().split(/\s+/).filter(Boolean).length;
+        }
+
+        // Live word-count under feedback textarea
+        function updateFeedbackCount() {
+            const text = document.getElementById('feedback-text').value;
+            const count = countWords(text);
+            const el = document.getElementById('feedback-word-count');
+            el.textContent = `${count} / 500 words`;
+            el.classList.toggle('over', count > 500);
+        }
+
+        const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
         async function submitFeedback(e) {
             e.preventDefault();
             const submitBtn = document.getElementById('feedback-submit');
             const statusEl = document.getElementById('feedback-status');
             const feedbackText = document.getElementById('feedback-text').value.trim();
             const email = document.getElementById('feedback-email').value.trim();
+
+            // Client-side validation
+            if (countWords(feedbackText) > 500) {
+                statusEl.innerHTML = '<p class="feedback-error">Feedback is over the 500-word limit.</p>';
+                return;
+            }
+            if (email && !EMAIL_REGEX.test(email)) {
+                statusEl.innerHTML = '<p class="feedback-error">Please enter a valid email, or leave it blank.</p>';
+                return;
+            }
 
             const userValues = Array.from(finalValues).map(index => values[index].name);
 
@@ -1602,6 +1705,7 @@
             selectedValues.clear();
             keptValues.clear();
             finalValues.clear();
+            clearProgress();
             renderValuesGrid();
             updateSelectionCount();
             // Reset feedback form
@@ -1610,6 +1714,7 @@
             document.getElementById('feedback-submit').disabled = false;
             document.getElementById('feedback-submit').textContent = 'Submit';
             document.getElementById('feedback-status').innerHTML = '';
+            updateFeedbackCount();
             goToScreen(0);
         }
 
