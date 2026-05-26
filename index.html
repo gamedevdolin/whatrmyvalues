@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>What Are My Core Values? - A Quick Game of Self-Discovery</title>
+    <title>What Are My Core Values? - A Tool for Self-Discovery</title>
     <meta name="description" content="A free, interactive card-sorting tool that helps you discover your top 3 core values in about 5 minutes.">
     <link rel="canonical" href="https://whataremycorevalues.org/">
     <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
@@ -12,13 +12,13 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://whataremycorevalues.org/">
     <meta property="og:title" content="What Are My Core Values?">
-    <meta property="og:description" content="A quick game of self-discovery — narrow 57 values down to your top 3 in about 5 minutes.">
+    <meta property="og:description" content="A tool for self-discovery — narrow 57 values down to your top 3 in about 5 minutes.">
     <meta property="og:image" content="https://whataremycorevalues.org/images/og.png">
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="What Are My Core Values?">
-    <meta name="twitter:description" content="A quick game of self-discovery — narrow 57 values down to your top 3 in about 5 minutes.">
+    <meta name="twitter:description" content="A tool for self-discovery — narrow 57 values down to your top 3 in about 5 minutes.">
     <meta name="twitter:image" content="https://whataremycorevalues.org/images/og.png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -597,16 +597,17 @@
             }
 
             .selection-count {
-                position: static;
-                background: transparent;
+                position: sticky;
+                top: 0;
+                background: white;
                 color: var(--ocean-blue);
-                box-shadow: none;
-                padding: 0;
-                font-size: 1rem;
+                box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+                padding: 0.75rem 1rem;
+                font-size: 1.05rem;
             }
 
             .selection-count .count-number {
-                font-size: inherit;
+                font-size: 1.25rem;
             }
         }
 
@@ -747,6 +748,195 @@
             pointer-events: auto;
         }
 
+        /* SMART Goal screen */
+        .goals-content {
+            max-width: 560px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .goals-content h2 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .goals-intro {
+            color: #666;
+            margin: 0 auto 2rem;
+            max-width: 460px;
+        }
+
+        .goal-value-picker h3,
+        .smart-form h3,
+        .goal-reading h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.15rem;
+            color: var(--deep-brown);
+            margin-bottom: 1rem;
+        }
+
+        .goal-value-options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .goal-value-option {
+            background: white;
+            border: 2px solid var(--light-gray);
+            color: var(--deep-brown);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .goal-value-option:hover {
+            border-color: var(--sunset-coral);
+        }
+
+        .goal-value-option.selected {
+            background: linear-gradient(135deg, var(--sunset-orange) 0%, var(--sunset-coral) 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .smart-form {
+            text-align: left;
+            margin-top: 2rem;
+            border-top: 1px solid var(--light-gray);
+            padding-top: 2rem;
+        }
+
+        .smart-link {
+            color: var(--sunset-orange);
+            font-weight: 600;
+        }
+
+        .smart-field {
+            margin-bottom: 1.5rem;
+        }
+
+        .smart-label {
+            display: block;
+            font-family: 'Fraunces', serif;
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: var(--deep-brown);
+        }
+
+        .smart-letter {
+            color: var(--sunset-orange);
+            font-weight: 700;
+        }
+
+        .smart-hint {
+            font-size: 0.8rem;
+            color: #999;
+            margin: 0.3rem 0 0.5rem;
+        }
+
+        .smart-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            color: var(--deep-brown);
+        }
+
+        .smart-input:focus {
+            outline: none;
+            border-color: var(--ocean-blue);
+        }
+
+        .smart-timeframe {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .timeframe-btn {
+            flex: 1;
+            padding: 0.625rem;
+            border: 2px solid var(--light-gray);
+            background: white;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--deep-brown);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .timeframe-btn:hover {
+            border-color: var(--sunset-coral);
+        }
+
+        .timeframe-btn.selected {
+            background: var(--sunset-orange);
+            color: white;
+            border-color: transparent;
+        }
+
+        .goal-preview {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .goal-preview-text {
+            color: var(--deep-brown);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .goal-actions {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .goal-actions .btn-row .btn {
+            max-width: 200px;
+        }
+
+        .goals-sub {
+            font-size: 0.85rem;
+            color: #999;
+            margin: 0 auto 1rem;
+            max-width: 420px;
+        }
+
+        .goal-reading {
+            margin-top: 2.5rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--light-gray);
+            text-align: center;
+        }
+
+        .reading-list {
+            list-style: none;
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.9;
+        }
+
+        #goal-share-status {
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+            min-height: 1.2rem;
+        }
+
         /* Share modal */
         .share-modal {
             display: none;
@@ -829,7 +1019,7 @@
     <div class="container">
         <header>
             <h1>What are my core values?</h1>
-            <p class="tagline">A Quick Game of Self-Discovery</p>
+            <p class="tagline">A Tool for Self-Discovery</p>
         </header>
 
 
@@ -842,7 +1032,6 @@
                         Begin →
                     </button>
                 </div>
-                <p style="margin-top: 1.5rem; font-size: 0.8rem; color: #999;">This tool is a work in progress and currently works better on mobile.</p>
             </div>
         </div>
 
@@ -926,6 +1115,10 @@
                     help you understand conflicts, and remind you who you want to be.
                 </p>
 
+                <div class="btn-group btn-group-inline">
+                    <button class="btn btn-primary" onclick="goToScreen(5)">Turn a value into action →</button>
+                </div>
+
                 <div class="feedback-section" id="feedback-section">
                     <h3>Share your thoughts</h3>
                     <p class="feedback-subtitle">Your values are shared anonymously to help improve this tool</p>
@@ -943,7 +1136,107 @@
                         <button class="btn btn-secondary btn-small" onclick="goToScreen(2)">← Reconsider</button>
                         <button class="btn btn-secondary btn-small" onclick="shareAsImage()">Share</button>
                     </div>
-                    <button class="btn btn-primary btn-small" onclick="startOver()">Start Over</button>
+                    <button class="btn btn-secondary btn-small" onclick="startOver()">Start Over</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 5: SMART Goal -->
+        <div class="screen" id="screen-goals">
+            <div class="goals-content">
+                <h2>Turn a value into action</h2>
+                <p style="margin-bottom: 1.25rem; font-weight: 700; color: #999;">**This section is currently a work in progress.**</p>
+                <p class="goals-intro">
+                    Values are <strong>directions</strong>—not goals.<br>
+                    Still, setting a goal can help guide you towards embodying your core values.
+                    Choose one value below and follow the steps to shape a
+                    <a href="https://en.wikipedia.org/wiki/SMART_criteria" target="_blank" rel="noopener" class="smart-link">SMART Goal</a>.
+                </p>
+
+                <!-- Step 1: pick a value -->
+                <div class="goal-value-picker">
+                    <h3>Which value will you act on?</h3>
+                    <div class="goal-value-options" id="goal-value-options"></div>
+                </div>
+
+                <!-- Step 2: SMART form (revealed after a value is chosen) -->
+                <form class="smart-form" id="smart-form" hidden onsubmit="return false;">
+                    <div class="smart-field">
+                        <label class="smart-label" for="smart-specific"><span class="smart-letter">S</span>pecific</label>
+                        <p class="smart-hint">What exactly will you do?</p>
+                        <input type="text" id="smart-specific" class="smart-input" oninput="updateGoalState()">
+                    </div>
+
+                    <div class="smart-field">
+                        <label class="smart-label" for="smart-measurable"><span class="smart-letter">M</span>easurable</label>
+                        <p class="smart-hint">How will you know it worked? (e.g. rate yourself 1–10 at the end)</p>
+                        <input type="text" id="smart-measurable" class="smart-input" oninput="updateGoalState()">
+                    </div>
+
+                    <div class="smart-field">
+                        <label class="smart-label" for="smart-achievable"><span class="smart-letter">A</span>chievable</label>
+                        <p class="smart-hint">What makes this realistic? (time, resources, or telling someone)</p>
+                        <input type="text" id="smart-achievable" class="smart-input" oninput="updateGoalState()">
+                    </div>
+
+                    <div class="smart-field">
+                        <label class="smart-label" for="smart-relevant"><span class="smart-letter">R</span>elevant</label>
+                        <p class="smart-hint">The value this goal serves — already filled in for you.</p>
+                        <input type="text" id="smart-relevant" class="smart-input" oninput="updateGoalState()">
+                    </div>
+
+                    <div class="smart-field">
+                        <label class="smart-label" for="smart-longer"><span class="smart-letter">T</span>ime-Bound</label>
+                        <p class="smart-hint">Pick a short window — 1 to 3 weeks.</p>
+                        <div class="smart-timeframe" id="smart-timeframe">
+                            <button type="button" class="timeframe-btn" data-weeks="1" onclick="selectTimeframe(1)">1 week</button>
+                            <button type="button" class="timeframe-btn" data-weeks="2" onclick="selectTimeframe(2)">2 weeks</button>
+                            <button type="button" class="timeframe-btn" data-weeks="3" onclick="selectTimeframe(3)">3 weeks</button>
+                        </div>
+                        <input type="text" id="smart-longer" class="smart-input" placeholder="Optional: if your bigger goal takes longer, jot it here" oninput="updateGoalState()">
+                    </div>
+
+                    <!-- Assembled goal preview -->
+                    <div class="goal-preview" id="goal-preview" hidden>
+                        <h3>Your goal</h3>
+                        <p class="goal-preview-text" id="goal-preview-text"></p>
+                    </div>
+
+                    <!-- Reminders -->
+                    <div class="goal-actions">
+                        <h3>Set reminders</h3>
+                        <p class="goals-sub">Add reminders to your own Google Calendar — one to start, and one to check in when your time's up.</p>
+                        <div class="btn-row">
+                            <button type="button" class="btn btn-secondary btn-small" id="cal-start-btn" onclick="addCalendarReminder('start')" disabled>Start reminder</button>
+                            <button type="button" class="btn btn-secondary btn-small" id="cal-assess-btn" onclick="addCalendarReminder('assess')" disabled>Check-in reminder</button>
+                        </div>
+                    </div>
+
+                    <!-- Accountability -->
+                    <div class="goal-actions">
+                        <h3>Share with an accountability buddy</h3>
+                        <p class="goals-sub">Telling one person makes a goal stick. Not for social media — just send it to someone who'll check in on you.</p>
+                        <div class="btn-row">
+                            <button type="button" class="btn btn-secondary btn-small" id="share-copy-btn" onclick="copyGoal()" disabled>Copy goal</button>
+                            <button type="button" class="btn btn-secondary btn-small" id="share-email-btn" onclick="emailGoal()" disabled>Email it</button>
+                        </div>
+                        <div id="goal-share-status"></div>
+                    </div>
+                </form>
+
+                <!-- Further reading -->
+                <div class="goal-reading">
+                    <h3>Want to go deeper?</h3>
+                    <ul class="reading-list">
+                        <li><em>Atomic Habits</em> &amp; the Atomic Habits workbook — James Clear</li>
+                        <li><em>Deep Work</em> — Cal Newport</li>
+                        <li><em>The ADHD Field Guide</em> — Cate Osborn and Erik Gude</li>
+                    </ul>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-secondary btn-small" onclick="goToScreen(4)">← Back to values</button>
+                    <button class="btn btn-secondary btn-small" onclick="startOver()">Start Over</button>
                 </div>
             </div>
         </div>
@@ -1036,6 +1329,7 @@
         let selectedValues = new Set();
         let keptValues = new Set();
         let finalValues = new Set();
+        let goal = { valueName: null, specific: '', measurable: '', achievable: '', relevant: '', longer: '', weeks: null };
 
         // Track sticky state
         let isSticky = false;
@@ -1052,6 +1346,7 @@
                     selected: toNames(selectedValues),
                     kept: toNames(keptValues),
                     final: toNames(finalValues),
+                    goal: goal,
                 }));
             } catch (e) { /* storage unavailable — ignore */ }
         }
@@ -1067,7 +1362,18 @@
                 selectedValues = toSet(state.selected);
                 keptValues = toSet(state.kept);
                 finalValues = toSet(state.final);
-                currentScreen = Math.max(0, Math.min(4, state.screen | 0));
+                if (state.goal && typeof state.goal === 'object') {
+                    goal = {
+                        valueName: state.goal.valueName || null,
+                        specific: state.goal.specific || '',
+                        measurable: state.goal.measurable || '',
+                        achievable: state.goal.achievable || '',
+                        relevant: state.goal.relevant || '',
+                        longer: state.goal.longer || '',
+                        weeks: state.goal.weeks || null,
+                    };
+                }
+                currentScreen = Math.max(0, Math.min(5, state.screen | 0));
             } catch (e) { /* corrupt storage — ignore */ }
         }
 
@@ -1306,7 +1612,7 @@
                 countEl.innerHTML = `<strong>Select at least 5 values to continue</strong><br>(${count} selected)`;
                 countEl.style.background = 'var(--sunset-orange)';
                 setTimeout(() => {
-                    countEl.style.background = 'var(--ocean-blue)';
+                    countEl.style.background = '';
                     updateSelectionCount();
                 }, 2000);
             } else {
@@ -1320,7 +1626,7 @@
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
 
             // Show target screen
-            const screens = ['screen-intro', 'screen-select', 'screen-narrow', 'screen-timed', 'screen-results'];
+            const screens = ['screen-intro', 'screen-select', 'screen-narrow', 'screen-timed', 'screen-results', 'screen-goals'];
             document.getElementById(screens[screenIndex]).classList.add('active');
 
             // Screen-specific setup
@@ -1330,6 +1636,8 @@
                 setupTimedScreen();
             } else if (screenIndex === 4) {
                 setupResultsScreen();
+            } else if (screenIndex === 5) {
+                setupGoalsScreen();
             }
 
             currentScreen = screenIndex;
@@ -1706,6 +2014,7 @@
             selectedValues.clear();
             keptValues.clear();
             finalValues.clear();
+            goal = { valueName: null, specific: '', measurable: '', achievable: '', relevant: '', longer: '', weeks: null };
             clearProgress();
             renderValuesGrid();
             updateSelectionCount();
@@ -1717,6 +2026,193 @@
             document.getElementById('feedback-status').innerHTML = '';
             updateFeedbackCount();
             goToScreen(0);
+        }
+
+        // --- SMART Goal step ---
+
+        // Editable example suggestions shown as placeholders. Value-specific for the
+        // starter set below; everything else falls back to GENERIC_EXAMPLE.
+        const GENERIC_EXAMPLE = {
+            specific: "e.g. take one concrete action that reflects this value",
+            measurable: "e.g. did I do it? rate how it felt 1–10 afterward",
+            achievable: "e.g. set aside 1 hour a week and tell someone I'm doing it",
+        };
+
+        const GOAL_EXAMPLES = {
+            "Assertiveness": { specific: "e.g. say no to one request that doesn't serve me", measurable: "e.g. count the times I spoke up; rate my comfort 1–10", achievable: "e.g. start with low-stakes moments; rehearse one phrase" },
+            "Authenticity": { specific: "e.g. share an honest opinion I'd usually keep quiet", measurable: "e.g. note each candid moment; rate how true-to-myself I felt 1–10", achievable: "e.g. pick one safe conversation this week" },
+            "Community": { specific: "e.g. show up to one local event or help a neighbor", measurable: "e.g. times I contributed; rate my sense of connection 1–10", achievable: "e.g. block one evening; invite a friend along" },
+            "Courage": { specific: "e.g. do one thing that scares me a little", measurable: "e.g. did I follow through? rate fear vs. payoff 1–10", achievable: "e.g. choose something small but real; tell someone my plan" },
+            "Creativity": { specific: "e.g. make something small — a sketch, song, or piece of writing", measurable: "e.g. count sessions; rate how alive it felt 1–10", achievable: "e.g. set aside 1 hour at the same time each week" },
+            "Curiosity": { specific: "e.g. explore one topic I know nothing about", measurable: "e.g. hours spent learning; rate how engaged I felt 1–10", achievable: "e.g. pick one book, course, or person to ask" },
+            "Empathy": { specific: "e.g. really listen to one person without fixing or judging", measurable: "e.g. number of real conversations; rate how present I was 1–10", achievable: "e.g. set my phone aside for one talk this week" },
+            "Fairness": { specific: "e.g. speak up for someone being treated unfairly", measurable: "e.g. did I act when it mattered? rate 1–10", achievable: "e.g. notice one situation and decide my response ahead of time" },
+            "Fitness": { specific: "e.g. go for a 30-minute walk three times", measurable: "e.g. count the walks; rate my energy 1–10 afterward", achievable: "e.g. schedule it; lay out my shoes the night before" },
+            "Freedom": { specific: "e.g. drop one commitment that drains me", measurable: "e.g. hours reclaimed; rate how free I feel 1–10", achievable: "e.g. pick the smallest obligation to let go of first" },
+            "Friendliness": { specific: "e.g. reach out to one friend I've lost touch with", measurable: "e.g. people I connected with; rate the warmth 1–10", achievable: "e.g. send one message today; suggest a specific time" },
+            "Fun": { specific: "e.g. plan one genuinely playful activity", measurable: "e.g. did it happen? rate how much I laughed 1–10", achievable: "e.g. put it on the calendar; invite someone" },
+            "Gratitude": { specific: "e.g. write down three things I'm grateful for each day", measurable: "e.g. days I kept it up; rate my mood 1–10", achievable: "e.g. keep a note by my bed; do it before sleep" },
+            "Honesty": { specific: "e.g. tell the truth in one moment I'd normally smooth over", measurable: "e.g. count honest moments; rate how clean it felt 1–10", achievable: "e.g. start with a low-stakes truth this week" },
+            "Humor": { specific: "e.g. share something that made me laugh with someone", measurable: "e.g. number of light moments; rate my mood 1–10", achievable: "e.g. save funny things during the day to pass along" },
+            "Love": { specific: "e.g. do one thoughtful thing for someone I love", measurable: "e.g. count the gestures; rate our closeness 1–10", achievable: "e.g. pick one person and one small act this week" },
+            "Resilience": { specific: "e.g. keep going on one thing after a setback", measurable: "e.g. did I get back up? rate my bounce-back 1–10", achievable: "e.g. name the obstacle and one tiny next step" },
+        };
+
+        function setupGoalsScreen() {
+            const optionsEl = document.getElementById('goal-value-options');
+            const finalArray = Array.from(finalValues);
+
+            optionsEl.innerHTML = finalArray.map(index => {
+                const name = values[index].name;
+                return `<button type="button" class="goal-value-option" data-value="${name}" onclick="selectValueForGoal(this.dataset.value)">${name}</button>`;
+            }).join('');
+
+            document.getElementById('goal-share-status').innerHTML = '';
+
+            // Restore a saved goal if its value is still among the final three
+            if (goal.valueName && finalArray.some(i => values[i].name === goal.valueName)) {
+                selectValueForGoal(goal.valueName);
+            } else {
+                goal.valueName = null;
+                document.getElementById('smart-form').hidden = true;
+            }
+        }
+
+        function selectValueForGoal(valueName) {
+            const switching = goal.valueName && goal.valueName !== valueName;
+            goal.valueName = valueName;
+
+            // Pre-fill Relevant with the chosen value; the value is the relevant thing.
+            if (switching || !goal.relevant) goal.relevant = valueName;
+            // Switching to a different value starts a fresh goal.
+            if (switching) {
+                goal.specific = goal.measurable = goal.achievable = goal.longer = '';
+                goal.weeks = null;
+            }
+
+            document.getElementById('smart-specific').value = goal.specific || '';
+            document.getElementById('smart-measurable').value = goal.measurable || '';
+            document.getElementById('smart-achievable').value = goal.achievable || '';
+            document.getElementById('smart-relevant').value = goal.relevant || valueName;
+            document.getElementById('smart-longer').value = goal.longer || '';
+
+            const ex = GOAL_EXAMPLES[valueName] || GENERIC_EXAMPLE;
+            document.getElementById('smart-specific').placeholder = ex.specific;
+            document.getElementById('smart-measurable').placeholder = ex.measurable;
+            document.getElementById('smart-achievable').placeholder = ex.achievable;
+
+            document.querySelectorAll('.timeframe-btn').forEach(b => {
+                b.classList.toggle('selected', goal.weeks === parseInt(b.dataset.weeks));
+            });
+            document.querySelectorAll('.goal-value-option').forEach(b => {
+                b.classList.toggle('selected', b.dataset.value === valueName);
+            });
+
+            document.getElementById('smart-form').hidden = false;
+            refreshGoalPreview();
+            saveProgress();
+        }
+
+        function selectTimeframe(weeks) {
+            goal.weeks = weeks;
+            document.querySelectorAll('.timeframe-btn').forEach(b => {
+                b.classList.toggle('selected', parseInt(b.dataset.weeks) === weeks);
+            });
+            refreshGoalPreview();
+            saveProgress();
+        }
+
+        function updateGoalState() {
+            goal.specific = document.getElementById('smart-specific').value;
+            goal.measurable = document.getElementById('smart-measurable').value;
+            goal.achievable = document.getElementById('smart-achievable').value;
+            goal.relevant = document.getElementById('smart-relevant').value;
+            goal.longer = document.getElementById('smart-longer').value;
+            refreshGoalPreview();
+            saveProgress();
+        }
+
+        function buildGoalSentence() {
+            const v = (goal.relevant || goal.valueName || '').trim();
+            const s = goal.specific.trim();
+            const m = goal.measurable.trim();
+            const a = goal.achievable.trim();
+            const wk = goal.weeks;
+            let out = '';
+            if (v) out += `To honor my value of ${v}, `;
+            out += `I will ${s || '…'}`;
+            if (wk) out += ` over the next ${wk} week${wk > 1 ? 's' : ''}`;
+            out += '.';
+            if (m) out += ` I'll measure success by: ${m}.`;
+            if (a) out += ` I'll make it achievable by: ${a}.`;
+            if (goal.longer.trim()) out += ` (Part of a bigger goal: ${goal.longer.trim()}.)`;
+            return out;
+        }
+
+        function refreshGoalPreview() {
+            const previewEl = document.getElementById('goal-preview');
+            const previewText = document.getElementById('goal-preview-text');
+            const hasSpecific = !!(goal.valueName && goal.specific.trim());
+            const ready = hasSpecific && !!goal.weeks;
+
+            if (hasSpecific) {
+                previewEl.hidden = false;
+                previewText.textContent = buildGoalSentence();
+            } else {
+                previewEl.hidden = true;
+            }
+
+            ['cal-start-btn', 'cal-assess-btn', 'share-copy-btn', 'share-email-btn'].forEach(id => {
+                document.getElementById(id).disabled = !ready;
+            });
+        }
+
+        // Build a Google Calendar "add event" link (no API, opens in the user's own account).
+        function gcalStamp(d) {
+            const p = (n) => String(n).padStart(2, '0');
+            return d.getUTCFullYear() + p(d.getUTCMonth() + 1) + p(d.getUTCDate())
+                + 'T' + p(d.getUTCHours()) + p(d.getUTCMinutes()) + '00Z';
+        }
+
+        function addCalendarReminder(type) {
+            const wk = goal.weeks || 1;
+            const goalText = buildGoalSentence();
+            const start = new Date();
+            let title, details;
+
+            if (type === 'start') {
+                start.setDate(start.getDate() + 1);
+                title = `Start: my ${goal.valueName} goal`;
+                details = `Time to begin.\n\n${goalText}`;
+            } else {
+                start.setDate(start.getDate() + wk * 7);
+                title = `Check in: my ${goal.valueName} goal`;
+                details = `Time's up — how did it go? Rate yourself 1–10.\n\n${goalText}`;
+            }
+            start.setHours(9, 0, 0, 0);
+            const end = new Date(start.getTime() + 30 * 60 * 1000);
+
+            const url = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+                + '&text=' + encodeURIComponent(title)
+                + '&dates=' + gcalStamp(start) + '/' + gcalStamp(end)
+                + '&details=' + encodeURIComponent(details);
+            window.open(url, '_blank', 'noopener');
+        }
+
+        async function copyGoal() {
+            const statusEl = document.getElementById('goal-share-status');
+            try {
+                await navigator.clipboard.writeText(buildGoalSentence());
+                statusEl.innerHTML = '<span class="feedback-success">Copied — paste it to your accountability buddy.</span>';
+            } catch (e) {
+                statusEl.innerHTML = '<span class="feedback-error">Couldn\'t copy automatically — select the goal above and copy it.</span>';
+            }
+        }
+
+        function emailGoal() {
+            const subject = `Holding me accountable: my ${goal.valueName} goal`;
+            const body = `${buildGoalSentence()}\n\nWill you check in with me when my time's up?`;
+            window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         }
 
         // Initialize on load
