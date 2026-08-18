@@ -27,12 +27,13 @@ A free, interactive card-sorting web app that helps people discover their core v
 - **Do not** introduce new hex values or colors outside this palette
 
 ## Game Flow (subject to change)
-Users narrow down from 57 values → 10 → 5 → 3 across multiple screens. The number of screens, the specific narrowing steps, and the flow may all evolve as we refine the experience with the psychologist:
+Users choose from the full values list (56 as of Aug 2026, see `values.json`) → 10 → 5 → 3 across multiple screens. The number of screens, the specific narrowing steps, and the flow may all evolve as we refine the experience with the psychologist:
 1. **Intro** — explains the exercise
 2. **Select 10** — browse all values in a card grid, pick 10
-3. **Narrow to 5** — keep/remove toggle to cut to 5
-4. **Pick top 3** — final selection (timer feature exists but is currently disabled)
+3. **Narrow to 5** — keep/remove toggle to cut to 5 (all start selected)
+4. **Pick top 3** — positive selection: all start unchecked, pick exactly 3 (timer feature exists but is currently disabled)
 5. **Results** — shows final 3 values with definitions, optional feedback form, shareable image
+6. **SMART goal (optional)** — "Turn a value into action →" on the results screen opens a guided SMART-goal form for one chosen value (stored locally only, designed with the psychologist)
 
 ## Conventions
 - **Keep everything in `index.html`** — do not split into separate CSS/JS files
@@ -44,9 +45,9 @@ Users narrow down from 57 values → 10 → 5 → 3 across multiple screens. The
 - Batch API calls where possible — never loop individual requests
 
 ## Data & Content
-- The 57 values and their definitions are currently hardcoded in the JS section of `index.html`
-- Future plan: Move values to a Notion database for easier editing by Adam and the psychologist partner
-- Values data changes infrequently — prefer build-time fetching over runtime when we set up the Notion integration
+- The values and their definitions live in `values.json`, committed to the repo — this is the source of truth the app loads at runtime
+- `index.html` also has a hardcoded copy of the list as a fallback in case `values.json` fails to load — keep both in sync when editing values
+- History: values briefly lived in a Notion database fetched at build time; that integration was removed in Aug 2026 when Adam stopped using Notion
 
 ## Disabled Features (commented out in index.html)
 - **Kindred Spirits:** Matching users to philosophical schools and fictional characters based on their values. ~200 lines of commented code including 15 philosophy profiles and 20 character profiles.

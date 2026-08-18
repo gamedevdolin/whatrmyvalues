@@ -12,13 +12,13 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://whataremycorevalues.org/">
     <meta property="og:title" content="What Are My Core Values?">
-    <meta property="og:description" content="A tool for self-discovery — narrow 57 values down to your top 3 in about 5 minutes.">
+    <meta property="og:description" content="A tool for self-discovery — choose your top 3 core values from 56 in about 5 minutes.">
     <meta property="og:image" content="https://whataremycorevalues.org/images/og.png">
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="What Are My Core Values?">
-    <meta name="twitter:description" content="A tool for self-discovery — narrow 57 values down to your top 3 in about 5 minutes.">
+    <meta name="twitter:description" content="A tool for self-discovery — choose your top 3 core values from 56 in about 5 minutes.">
     <meta name="twitter:image" content="https://whataremycorevalues.org/images/og.png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -265,6 +265,25 @@
 
         .value-checkbox label {
             cursor: pointer;
+        }
+
+        /* Invisible debug triggers (bottom-right: intro screen; top-right: selection screen) */
+        .debug-trigger {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 48px;
+            height: 48px;
+            opacity: 0;
+            background: transparent;
+            border: none;
+            cursor: default;
+            z-index: 200;
+        }
+
+        .debug-trigger.top-right {
+            bottom: auto;
+            top: 0;
         }
 
         /* Narrow screen */
@@ -1083,10 +1102,8 @@
         <!-- Screen 3: Timed Round (Surprise!) -->
         <div class="screen" id="screen-timed">
             <div class="surprise-reveal">
-                <h2>Now pick your TOP 3</h2>
+                <h2>Now pick your top three</h2>
                </div>
-
-            <div class="selection-count" id="timed-count">Pick 3 values</div>
 
             <div class="narrow-values" id="timed-values">
                 <!-- Top 5 values will be shown here -->
@@ -1111,8 +1128,9 @@
                 </div>
 
                 <p class="results-message">
-                    These three values represent what matters most to you. They can guide your decisions,
-                    help you understand conflicts, and remind you who you want to be.
+                    Right now, at this moment in your life, these three values represent what matters
+                    most to you. They can guide your decisions, help you resolve conflicts, and remind
+                    you who you want to be.
                 </p>
 
                 <div class="btn-group btn-group-inline">
@@ -1264,9 +1282,16 @@
         </footer>
     </div>
 
+    <!-- Hidden debug triggers: triple-tap to auto-select 10 random values
+         (for testing the flow quickly). Bottom-right corner works on the
+         intro screen; top-right corner works on the values-selection screen.
+         Invisible and skipped by screen readers/keyboard on purpose. -->
+    <button class="debug-trigger" aria-hidden="true" tabindex="-1" onclick="handleDebugTap(0)"></button>
+    <button class="debug-trigger top-right" aria-hidden="true" tabindex="-1" onclick="handleDebugTap(1)"></button>
+
     <script>
-        // Values data
-        const values = [
+        // Values data — hardcoded fallback (Notion data loaded at init if available)
+        const FALLBACK_VALUES = [
             { name: "Achievement", definition: "To accomplish meaningful goals and succeed at what I set out to do" },
             { name: "Adventure", definition: "To be adventurous; to actively seek, create, or explore novel or stimulating experiences" },
             { name: "Assertiveness", definition: "To respectfully stand up for my rights and request what I want" },
@@ -1278,6 +1303,7 @@
             { name: "Courage", definition: "To be courageous or brave; to persist in the face of fear, threat, or difficulty" },
             { name: "Creativity", definition: "To be creative or innovative" },
             { name: "Curiosity", definition: "To be curious, open-minded and interested; to explore and discover" },
+            { name: "Diversity", definition: "To value, respect, and appreciate a wide range of people, perspectives, and ways of life" },
             { name: "Empathy", definition: "To understand and share the feelings of others" },
             { name: "Encouragement", definition: "To encourage and reward behavior that I value in myself or others" },
             { name: "Equality", definition: "To treat others as equal to myself, and vice-versa" },
@@ -1324,6 +1350,9 @@
             { name: "Wisdom", definition: "To gain and apply knowledge and experience" }
         ];
 
+        // Active values — starts as fallback, replaced by Notion data if available
+        let values = FALLBACK_VALUES;
+
         // State
         let currentScreen = 0;
         let selectedValues = new Set();
@@ -1331,17 +1360,16 @@
         let finalValues = new Set();
         let goal = { valueName: null, specific: '', measurable: '', achievable: '', relevant: '', longer: '', weeks: null };
 
-        // Track sticky state
-        let isSticky = false;
-
         // --- Progress persistence ---
+        // v2: narrowing screens switched from remove-to-5 to pick-your-top-5,
+        // so v1 saves (which pre-selected everything) are ignored.
         const STORAGE_KEY = 'wamcv-progress-v1';
 
         function saveProgress() {
             try {
                 const toNames = (set) => [...set].map(i => values[i] && values[i].name).filter(Boolean);
                 localStorage.setItem(STORAGE_KEY, JSON.stringify({
-                    v: 1,
+                    v: 2,
                     screen: currentScreen,
                     selected: toNames(selectedValues),
                     kept: toNames(keptValues),
@@ -1356,7 +1384,7 @@
                 const raw = localStorage.getItem(STORAGE_KEY);
                 if (!raw) return;
                 const state = JSON.parse(raw);
-                if (state.v !== 1) return;
+                if (state.v !== 2) return;
                 const nameToIndex = new Map(values.map((v, i) => [v.name, i]));
                 const toSet = (names) => new Set((names || []).map(n => nameToIndex.get(n)).filter(i => i !== undefined));
                 selectedValues = toSet(state.selected);
@@ -1381,12 +1409,27 @@
             try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
         }
 
+        // Load values from values.json — the source of truth, committed to
+        // the repo (falls back to the hardcoded list above if it fails)
+        async function loadValues() {
+            try {
+                const res = await fetch("values.json");
+                if (!res.ok) return;
+                const data = await res.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    values = data;
+                }
+            } catch (e) {
+                // Silently fall back to hardcoded values
+            }
+        }
+
         // Initialize
-        function init() {
+        async function init() {
+            await loadValues();
             loadProgress();
             renderValuesGrid();
             updateSelectionCount();
-            setupStickyObserver();
             setupKeyboardActivation();
 
             // Add scroll listener for results screen buttons
@@ -1415,21 +1458,36 @@
             });
         }
 
-        // Setup sticky detection
-        function setupStickyObserver() {
-            const countEl = document.getElementById('selection-count');
+        // --- Hidden debug shortcut ---
+        // Triple-tap an invisible corner to auto-select 10 random values:
+        // bottom-right on the intro screen, top-right on the selection screen.
+        // Each trigger only works on its own screen (the screen argument).
+        let debugTaps = 0;
+        let debugTapTimer = null;
 
-            window.addEventListener('scroll', () => {
-                if (currentScreen !== 1) return;
+        function handleDebugTap(screen) {
+            if (currentScreen !== screen) return;
+            debugTaps++;
+            clearTimeout(debugTapTimer);
+            debugTapTimer = setTimeout(() => { debugTaps = 0; }, 600);
+            if (debugTaps < 3) return;
+            debugTaps = 0;
+            debugSelectRandom();
+        }
 
-                const rect = countEl.getBoundingClientRect();
-                const wasSticky = isSticky;
-                isSticky = rect.top <= 10;
-
-                if (wasSticky !== isSticky) {
-                    updateSelectionCount();
-                }
-            });
+        function debugSelectRandom() {
+            // Fisher–Yates shuffle, then take the first 10
+            const indices = values.map((_, i) => i);
+            for (let i = indices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indices[i], indices[j]] = [indices[j], indices[i]];
+            }
+            selectedValues = new Set(indices.slice(0, 10));
+            keptValues = new Set();
+            finalValues = new Set();
+            renderValuesGrid();
+            updateSelectionCount();
+            goToScreen(1);
         }
 
         // Track which card is currently expanded
@@ -1557,10 +1615,7 @@
                     // Revert checkbox
                     const cb = document.getElementById(`cb-${index}`);
                     if (cb) cb.checked = false;
-                    const countEl = document.getElementById('selection-count');
-                    countEl.classList.remove('pulse');
-                    void countEl.offsetWidth;
-                    countEl.classList.add('pulse');
+                    pulseCount(document.getElementById('selection-count'));
                     return;
                 }
                 selectedValues.add(index);
@@ -1647,8 +1702,10 @@
 
         // Setup narrow screen
         function setupNarrowScreen() {
-            // Preserve prior narrowing when re-entering (e.g. from Reconsider).
-            // Re-seed only on first entry or when selections have changed.
+            // Elimination style: start with all selected values kept, and the
+            // user removes down to 5. Preserve prior narrowing when re-entering
+            // (e.g. from Reconsider); re-seed on first entry or when the
+            // selections have changed.
             const hasStale = [...keptValues].some(i => !selectedValues.has(i));
             if (keptValues.size === 0 || hasStale) {
                 keptValues = new Set(selectedValues);
@@ -1692,6 +1749,13 @@
             updateNarrowCount();
         }
 
+        // Flash a counter to signal the selection limit is reached
+        function pulseCount(countEl) {
+            countEl.classList.remove('pulse');
+            void countEl.offsetWidth;
+            countEl.classList.add('pulse');
+        }
+
         // Toggle kept value
         function toggleKept(index) {
             if (keptValues.has(index)) {
@@ -1725,11 +1789,10 @@
 
         // Setup timed screen
         function setupTimedScreen() {
-            // Preserve prior final picks when re-entering.
-            const hasStale = [...finalValues].some(i => !keptValues.has(i));
-            if (finalValues.size === 0 || hasStale) {
-                finalValues = new Set(keptValues);
-            }
+            // Positive selection: start with nothing chosen so the user picks
+            // their top 3. Prior picks survive re-entry; picks no longer in
+            // the top 5 are dropped.
+            finalValues = new Set([...finalValues].filter(i => keptValues.has(i)));
             renderTimedList();
         }
 
@@ -1742,7 +1805,7 @@
                 const value = values[index];
                 const isKept = finalValues.has(index);
                 return `
-                    <div class="narrow-card ${isKept ? 'kept' : 'removed'}"
+                    <div class="narrow-card ${isKept ? 'kept' : ''}"
                          onclick="toggleFinal(${index})"
                          data-timed-index="${index}"
                          role="button"
@@ -1762,39 +1825,29 @@
 
         // Toggle final value
         function toggleFinal(index) {
-            if (finalValues.has(index)) {
-                finalValues.delete(index);
-            } else {
+            const selecting = !finalValues.has(index);
+            if (selecting && finalValues.size >= 3) {
+                return;
+            }
+
+            if (selecting) {
                 finalValues.add(index);
+            } else {
+                finalValues.delete(index);
             }
 
             const card = document.querySelector(`[data-timed-index="${index}"]`);
-            const isKept = finalValues.has(index);
-            card.classList.toggle('kept', isKept);
-            card.classList.toggle('removed', !isKept);
-            card.setAttribute('aria-pressed', isKept);
-            card.querySelector('.narrow-toggle').textContent = isKept ? '✓' : '';
+            card.classList.toggle('kept', selecting);
+            card.setAttribute('aria-pressed', selecting);
+            card.querySelector('.narrow-toggle').textContent = selecting ? '✓' : '';
 
             updateTimedCount();
             saveProgress();
         }
 
-        // Update timed count
+        // Enable the continue button once exactly 3 are picked
         function updateTimedCount() {
-            const count = finalValues.size;
-            const diff = count - 3;
-
-            let message;
-            if (diff > 0) {
-                message = `Remove ${diff} more!`;
-            } else if (diff < 0) {
-                message = `Keep ${Math.abs(diff)} more!`;
-            } else {
-                message = "You've got your 3!";
-            }
-
-            document.getElementById('timed-count').textContent = message;
-            document.getElementById('btn-to-final').disabled = count !== 3;
+            document.getElementById('btn-to-final').disabled = finalValues.size !== 3;
         }
 
         // Setup results screen
