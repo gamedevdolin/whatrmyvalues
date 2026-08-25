@@ -1427,7 +1427,18 @@
         // Initialize
         async function init() {
             await loadValues();
-            loadProgress();
+            // ?fresh in the URL starts a clean session (used by shared/QR
+            // links) — wipes any saved progress, then hides the param so a
+            // reload or shared address doesn't keep clearing.
+            const params = new URLSearchParams(location.search);
+            if (params.has('fresh')) {
+                clearProgress();
+                params.delete('fresh');
+                const qs = params.toString();
+                history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
+            } else {
+                loadProgress();
+            }
             renderValuesGrid();
             updateSelectionCount();
             setupKeyboardActivation();
